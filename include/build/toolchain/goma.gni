@@ -1,0 +1,34 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Defines the configuration of Goma.
+#
+# This is currently designed to match the GYP build exactly, so as not to break
+# people during the transition.
+
+declare_args() {
+  use_goma = false
+
+  goma_dir = ""
+}
+
+if (use_goma && goma_dir == "") {
+  # Set the default goma directory. This must be a character-for-character
+  # match for the GYP default or else the compilers for the different targets
+  # won't match and GYP will assert.
+  if (is_win) {
+    goma_dir = "c:\goma\goma-win"
+  } else {
+    goma_dir = exec_script("get_default_posix_goma_dir.py", [], "value")
+  }
+}
+
+if (use_goma) {
+  # Define the toolchain for the GYP build when using goma.
+  make_goma_global_settings =
+    "['CC_wrapper', '$goma_dir/gomacc']," +
+    "['CXX_wrapper', '$goma_dir/gomacc']," +
+    "['CC.host_wrapper', '$goma_dir/gomacc']," +
+    "['CXX.host_wrapper', '$goma_dir/gomacc'],"
+}
