@@ -17,7 +17,7 @@ inline bool IsFinite(const double& number) {
   // isfinite isn't available on Android: http://b.android.com/34793
   return finite(number) != 0;
 #elif defined(OS_POSIX)
-  return isfinite(number) != 0;
+  return std::isfinite(number) != 0;
 #elif defined(OS_WIN)
   return _finite(number) != 0;
 #endif

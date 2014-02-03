@@ -38,7 +38,88 @@ SO_OBJECTS=\
 	$(OBJDIR)/trace_marker.o \
 	$(OBJDIR)/tracer.o \
 	$(OBJDIR)/trend_classifying_filter_interpreter.o \
-	$(OBJDIR)/util.o
+	$(OBJDIR)/util.o \
+	$(OBJDIR)/values.o \
+	$(OBJDIR)/json_reader.o \
+	$(OBJDIR)/json_writer.o \
+	$(OBJDIR)/json_parser.o \
+	$(OBJDIR)/string_util.o \
+	$(OBJDIR)/stringprintf.o \
+	$(OBJDIR)/string16.o \
+	$(OBJDIR)/logging.o \
+	$(OBJDIR)/icu_utf.o \
+	$(OBJDIR)/file_util.o \
+	$(OBJDIR)/file_util_linux.o \
+	$(OBJDIR)/file_util_posix.o \
+	$(OBJDIR)/file_path.o \
+	$(OBJDIR)/utf_string_conversions.o \
+	$(OBJDIR)/atomicops_internals_x86_gcc.o \
+	$(OBJDIR)/at_exit.o \
+	$(OBJDIR)/thread_restrictions.o \
+	$(OBJDIR)/singleton.o \
+	$(OBJDIR)/platform_thread_posix.o \
+	$(OBJDIR)/lock.o \
+	$(OBJDIR)/debugger.o \
+	$(OBJDIR)/debugger_posix.o \
+	$(OBJDIR)/command_line.o \
+	$(OBJDIR)/base_switches.o \
+	$(OBJDIR)/base_paths.o \
+	$(OBJDIR)/base_paths_posix.o \
+	$(OBJDIR)/gtest-typed-test.o \
+	$(OBJDIR)/gtest-test-part.o \
+	$(OBJDIR)/gtest-printers.o \
+	$(OBJDIR)/gtest-port.o \
+	$(OBJDIR)/gtest-filepath.o \
+	$(OBJDIR)/gtest-death-test.o \
+	$(OBJDIR)/gtest.o \
+	$(OBJDIR)/string_escape.o \
+	$(OBJDIR)/string_number_conversions.o \
+	$(OBJDIR)/string_piece.o \
+	$(OBJDIR)/lock_impl_posix.o \
+	$(OBJDIR)/stack_trace.o \
+	$(OBJDIR)/stack_trace_posix.o \
+	$(OBJDIR)/alias.o \
+	$(OBJDIR)/safe_strerror_posix.o \
+	$(OBJDIR)/vlog.o \
+	$(OBJDIR)/platform_file.o \
+	$(OBJDIR)/platform_file_posix.o \
+	$(OBJDIR)/sys_string_conversions_posix.o \
+	$(OBJDIR)/pickle.o \
+	$(OBJDIR)/utf_string_conversion_utils.o \
+	$(OBJDIR)/utf_offset_string_conversions.o \
+	$(OBJDIR)/ref_counted.o \
+	$(OBJDIR)/ref_counted_memory.o \
+	$(OBJDIR)/callback_internal.o \
+	$(OBJDIR)/lazy_instance.o \
+	$(OBJDIR)/thread_local_posix.o \
+	$(OBJDIR)/time.o \
+	$(OBJDIR)/time_posix.o \
+	$(OBJDIR)/tracked_objects.o \
+	$(OBJDIR)/string_split.o \
+	$(OBJDIR)/path_service.o \
+	$(OBJDIR)/process_util_linux.o \
+	$(OBJDIR)/environment.o \
+	$(OBJDIR)/xdg_util.o \
+	$(OBJDIR)/g_fmt.o \
+	$(OBJDIR)/thread_collision_warner.o \
+	$(OBJDIR)/prtime.o \
+	$(OBJDIR)/location.o \
+	$(OBJDIR)/tracked_time.o \
+	$(OBJDIR)/process_util_posix.o \
+	$(OBJDIR)/thread_local_storage_posix.o \
+	$(OBJDIR)/dtoa.o \
+	$(OBJDIR)/alternate_timer.o \
+	$(OBJDIR)/process_util.o \
+	$(OBJDIR)/xdg_user_dir_lookup.o \
+	$(OBJDIR)/dynamic_annotations.o \
+	$(OBJDIR)/type_profiler_control.o \
+	$(OBJDIR)/type_profiler.o \
+	$(OBJDIR)/file_descriptor_shuffle.o \
+	$(OBJDIR)/sys_info.o \
+	$(OBJDIR)/sys_info_linux.o \
+	$(OBJDIR)/sys_info_posix.o \
+	$(OBJDIR)/process_linux.o \
+	$(OBJDIR)/process_posix.o 
 
 # Objects for unittests
 TEST_OBJECTS=\
@@ -76,25 +157,34 @@ TEST_OBJECTS=\
 	$(OBJDIR)/vector_unittest.o
 
 # Objects that are neither unittests nor SO objects
-MISC_OBJECTS=\
-	$(OBJDIR)/activity_replay.o \
+#MISC_OBJECTS=\
+#	$(OBJDIR)/activity_replay.o \
 
+MISC_OBJECTS=
 TEST_MAIN=\
 	$(OBJDIR)/test_main.o
 
 TEST_EXE=test
 SONAME=$(OBJDIR)/libgestures.so.0
 
+#ALL_OBJECTS=\
+#	$(TEST_OBJECTS) \
+#	$(TEST_MAIN) \
+#	$(SO_OBJECTS) \
+#	$(MISC_OBJECTS)
+
 ALL_OBJECTS=\
-	$(TEST_OBJECTS) \
 	$(TEST_MAIN) \
-	$(SO_OBJECTS) \
-	$(MISC_OBJECTS)
+	$(SO_OBJECTS)
+
+#ALL_OBJECT_FILES=\
+#	$(SO_OBJECTS) \
+#	$(MISC_OBJECTS) \
+#	$(TEST_OBJECTS) \
+#	$(TEST_MAIN)
 
 ALL_OBJECT_FILES=\
 	$(SO_OBJECTS) \
-	$(MISC_OBJECTS) \
-	$(TEST_OBJECTS) \
 	$(TEST_MAIN)
 
 DEPDIR = .deps
@@ -110,16 +200,13 @@ CXXFLAGS+=\
 	-Wclobbered \
 	-Wempty-body \
 	-Wignored-qualifiers \
-	-Wmissing-field-initializers \
-	-Wmissing-format-attribute \
-	-Wmissing-noreturn \
 	-Wsign-compare \
 	-Wtype-limits \
 	-D__STDC_FORMAT_MACROS=1 \
 	-D_FILE_OFFSET_BITS=64 \
-	-DWCHAR_T_IS_UTF16=1 \
 	-DGESTURES_INTERNAL=1 \
-	-Iinclude
+	-Iinclude \
+	`pkg-config --cflags glib-2.0`
 
 LID_TOUCHPAD_HELPER=lid_touchpad_helper
 
@@ -131,7 +218,7 @@ CXXFLAGS+=\
 	--coverage \
 	-ftest-coverage \
 	-fprofile-arcs
-LINK_FLAGS+=-lgcov
+LINK_FLAGS+=-lgcov `pkg-config --libs glib-2.0`
 else
 CXXFLAGS+=\
 	-DXLOGGING
@@ -150,10 +237,12 @@ LINK_FLAGS+=\
 	-lpthread \
 	-lrt
 
-TEST_LINK_FLAGS=\
-	-lgcov \
-	-lglib-2.0 \
-	-lgtest
+#TEST_LINK_FLAGS=\
+#	-lgcov \
+#	-lglib-2.0 \
+#	-lgtest
+
+TEST_LINK_FLAGS=
 
 all: $(SONAME)
 	$(MAKE) -C $(LID_TOUCHPAD_HELPER)
@@ -168,6 +257,11 @@ $(TEST_EXE): $(ALL_OBJECTS)
 $(OBJDIR)/%.o : src/%.cc
 	mkdir -p $(OBJDIR) $(DEPDIR) || true
 	$(CXX) $(CXXFLAGS) -MD -c -o $@ $<
+	@mv $(@:$.o=$.d) $(DEPDIR)
+
+$(OBJDIR)/%.o : src/%.c
+	mkdir -p $(OBJDIR) $(DEPDIR) || true
+	$(CC) $(CXXFLAGS) -MD -c -o $@ $<
 	@mv $(@:$.o=$.d) $(DEPDIR)
 
 LIBDIR = /usr/lib
