@@ -235,7 +235,8 @@ endif
 
 LINK_FLAGS+=\
 	-lpthread \
-	-lrt
+	-lrt \
+	-lgcov
 
 #TEST_LINK_FLAGS=\
 #	-lgcov \
