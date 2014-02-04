@@ -174,8 +174,8 @@ SONAME=$(OBJDIR)/libgestures.so.0
 #	$(MISC_OBJECTS)
 
 ALL_OBJECTS=\
-	$(TEST_MAIN) \
-	$(SO_OBJECTS)
+	$(SO_OBJECTS) \
+	$(TEST_MAIN) 
 
 #ALL_OBJECT_FILES=\
 #	$(SO_OBJECTS) \
@@ -185,7 +185,7 @@ ALL_OBJECTS=\
 
 ALL_OBJECT_FILES=\
 	$(SO_OBJECTS) \
-	$(TEST_MAIN)
+	$(TEST_MAIN) 
 
 DEPDIR = .deps
 
@@ -218,7 +218,7 @@ CXXFLAGS+=\
 	--coverage \
 	-ftest-coverage \
 	-fprofile-arcs
-LINK_FLAGS+=-lgcov `pkg-config --libs glib-2.0`
+LINK_FLAGS+=`pkg-config --libs glib-2.0`
 else
 CXXFLAGS+=\
 	-DXLOGGING
@@ -245,7 +245,7 @@ LINK_FLAGS+=\
 TEST_LINK_FLAGS=
 
 all: $(SONAME)
-	$(MAKE) -C $(LID_TOUCHPAD_HELPER)
+#	$(MAKE) -C $(LID_TOUCHPAD_HELPER)
 
 $(SONAME): $(SO_OBJECTS)
 	$(CXX) -shared -o $@ $(SO_OBJECTS) -Wl,-h$(SONAME:$(OBJDIR)/%=%) \
