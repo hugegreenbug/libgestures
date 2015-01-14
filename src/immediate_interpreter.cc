@@ -1004,7 +1004,7 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
       button_move_dist_(prop_reg, "Button Move Distance", 10.0),
       button_max_dist_from_expected_(prop_reg,
                                      "Button Max Distance From Expected", 20.0),
-      button_right_click_enable_(prop_reg, "Button Right Click Enable", 1),
+      button_right_zone_click_enable_(prop_reg, "Button Right Click Enable", 1),
       keyboard_touched_timeval_high_(prop_reg, "Keyboard Touched Timeval High",
                                      0),
       keyboard_touched_timeval_low_(prop_reg, "Keyboard Touched Timeval Low",
@@ -2397,14 +2397,14 @@ void ImmediateInterpreter::FillStartPositions(const HardwareState& hwstate) {
   }
 }
 
-int ImmediateInterpreter::GetButtonTypeFromPos(const HardwareState& hwstate) {
-  if (hwstate.touch_cnt <= 0 || 
-      !button_right_click_enable_.val_) {
+int ImmediateInterpreter::
+GetButtonTypeFromPosition(const HardwareState& hwstate) {
+  if (hwstate.touch_cnt <= 0 || !button_right_zone_click_enable_.val_) {
     return GESTURES_BUTTON_LEFT;
   }
 
   const FingerState& fs = hwstate.fingers[0];
-  if (fs.position_x > hwprops_->right/2) {
+  if (fs.position_x > hwprops_->right / 2) {
     return GESTURES_BUTTON_RIGHT;
   } 
 
@@ -2424,7 +2424,7 @@ int ImmediateInterpreter::EvaluateButtonType(
 
   // Just return the hardware state button if no further analysis is needed.
   if (!finger_button_click_.Update(hwstate, button_down_time)) {
-  	return GetButtonTypeFromPos(hwstate);
+  	return GetButtonTypeFromPosition(hwstate);
   }
 
   Log("EvaluateButtonType: R/C/H: %d/%d/%d",

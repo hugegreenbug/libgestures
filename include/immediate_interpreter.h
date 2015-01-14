@@ -384,7 +384,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   
   // Gets the hardware button type (RIGHT, LEFT) based on the 
   // first finger's position.
-  int GetButtonTypeFromPos(const HardwareState& hwstate);
+  int GetButtonTypeFromPosition(const HardwareState& hwstate);
 
   // Returns the square of the distance that this contact has travelled since
   // fingers changed (origin=false) or since they touched down (origin=true).
@@ -792,7 +792,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   DoubleProperty quick_acceleration_factor_;
 
   // Flag to enable the right click on the right side of the hardware button
-  BoolProperty button_right_click_enable_;
+  BoolProperty button_right_zone_click_enable_;
 };
 
 bool AnyGesturingFingerLeft(const HardwareState& state,
