@@ -2424,8 +2424,7 @@ int ImmediateInterpreter::EvaluateButtonType(
 
   // Just return the hardware state button if no further analysis is needed.
   bool finger_update = finger_button_click_.Update(hwstate, button_down_time);
-  if (!finger_update && hwprops_->is_button_pad && 
-      hwstate.buttons_down == GESTURES_BUTTON_LEFT) {
+  if (!finger_update && hwstate.buttons_down == GESTURES_BUTTON_LEFT) {
     return GetButtonTypeFromPosition(hwstate);
   } else if (!finger_update) {
     return hwstate.buttons_down;
