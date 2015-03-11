@@ -1,0 +1,29 @@
+--- gestures/src/scaling_filter_interpreter.cc	2015-03-02 13:09:35.320065675 -0700
++++ gestures.new/src/scaling_filter_interpreter.cc	2015-03-04 21:54:28.274060928 -0700
+@@ -240,7 +240,7 @@
+         copy.details.scroll.ordinal_dx *= screen_x_scale_;
+         copy.details.scroll.ordinal_dy *= screen_y_scale_;
+       }
+-      if (!australian_scrolling_.val_) {
++      if (australian_scrolling_.val_) {
+         copy.details.scroll.dx *= -1;
+         copy.details.scroll.dy *= -1;
+         copy.details.scroll.ordinal_dx *= -1;
+@@ -252,7 +252,7 @@
+       copy.details.fling.vy *= screen_y_scale_;
+       copy.details.fling.ordinal_vx *= screen_x_scale_;
+       copy.details.fling.ordinal_vy *= screen_y_scale_;
+-      if (!australian_scrolling_.val_) {
++      if (australian_scrolling_.val_) {
+         copy.details.fling.vx *= -1;
+         copy.details.fling.vy *= -1;
+         copy.details.fling.ordinal_vx *= -1;
+@@ -265,7 +265,7 @@
+       copy.details.swipe.dy *= screen_y_scale_;
+       copy.details.swipe.ordinal_dx *= screen_x_scale_;
+       copy.details.swipe.ordinal_dy *= screen_y_scale_;
+-      if (!australian_scrolling_.val_) {
++      if (australian_scrolling_.val_) {
+         copy.details.swipe.dy *= -1;
+         copy.details.swipe.ordinal_dy *= -1;
+       }
