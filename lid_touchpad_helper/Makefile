@@ -11,11 +11,14 @@ DESTDIR = .
 
 CXXFLAGS+=\
 	-g \
+	-std=gnu++11 \
 	-fno-exceptions \
 	-fno-strict-aliasing \
 	-fPIC \
+	-Wall \
 	-Wclobbered \
 	-Wempty-body \
+	-Werror \
 	-Wignored-qualifiers \
 	-Wmissing-field-initializers \
 	-Wsign-compare \
@@ -24,19 +27,18 @@ CXXFLAGS+=\
 	-D__STDC_FORMAT_MACROS=1 \
 	-D_FILE_OFFSET_BITS=64 \
 	-DGESTURES_INTERNAL=1 \
-	-I../include/
+	-I..
 
-#PKG_CONFIG ?= pkg-config
-#BASE_VER ?= 125070
-#PC_DEPS = libchrome-$(BASE_VER)
-#PC_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PC_DEPS))
-#PC_LIBS := $(shell $(PKG_CONFIG) --libs $(PC_DEPS))
+PKG_CONFIG ?= pkg-config
+BASE_VER ?= 125070
+PC_DEPS = libchrome-$(BASE_VER)
+PC_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PC_DEPS))
+PC_LIBS := $(shell $(PKG_CONFIG) --libs $(PC_DEPS))
 
 CXXFLAGS += $(PC_CFLAGS)
 
 LINK_FLAGS=\
 	$(PC_LIBS) \
-	-lgflags \
 	-lpthread \
 	-lrt \
 	-ludev \

@@ -7,13 +7,12 @@
 #include <vector>
 #include <utility>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "integral_gesture_filter_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/integral_gesture_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::deque;
 using std::make_pair;

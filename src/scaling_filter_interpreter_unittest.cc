@@ -4,17 +4,16 @@
 
 #include <deque>
 #include <math.h>
+#include <memory>
 #include <vector>
 #include <utility>
 
-#include <base/logging.h>
-#include <base/memory/scoped_ptr.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "scaling_filter_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/scaling_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::deque;
 using std::make_pair;
@@ -140,14 +139,14 @@ TEST(ScalingFilterInterpreterTest, SimpleTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    0, 0, 0  //t5r2, semi, button pad
+    0, 0, 0, 0  //t5r2, semi, button pad
   };
   HardwareProperties expected_hwprops = {
     0, 0, 100, 60,  // left, top, right, bottom
     1.0, 1.0, 25.4, 25.4, // x res, y res, x DPI, y DPI
     -M_PI_4,  // orientation minimum (1 tick above X-axis)
     M_PI_2,   // orientation maximum
-    2, 5, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 5, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
   base_interpreter->expected_hwprops_ = expected_hwprops;
 
@@ -235,13 +234,13 @@ TEST(ScalingFilterInterpreterTest, SimpleTest) {
   out = wrapper.SyncInterpret(&hs[2], NULL);
   ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
-  EXPECT_FLOAT_EQ(4.1 * 133.0 / 25.4, out->details.scroll.dx);
-  EXPECT_FLOAT_EQ(-10.3 * 133.0 / 25.4, out->details.scroll.dy);
+  EXPECT_FLOAT_EQ(-4.1 * 133.0 / 25.4, out->details.scroll.dx);
+  EXPECT_FLOAT_EQ(10.3 * 133.0 / 25.4, out->details.scroll.dy);
   out = wrapper.SyncInterpret(&hs[3], NULL);
   ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_EQ(kGestureTypeFling, out->type);
-  EXPECT_FLOAT_EQ(201.8 * 133.0 / 25.4, out->details.fling.vx);
-  EXPECT_FLOAT_EQ(-112.4 * 133.0 / 25.4, out->details.fling.vy);
+  EXPECT_FLOAT_EQ(-201.8 * 133.0 / 25.4, out->details.fling.vx);
+  EXPECT_FLOAT_EQ(112.4 * 133.0 / 25.4, out->details.fling.vy);
   EXPECT_EQ(GESTURES_FLING_START, out->details.fling.fling_state);
 
   // Test if we will drop the low pressure event.
@@ -284,7 +283,7 @@ static void RunTouchMajorAndMinorTest(
 
   float orientation, touch_major, touch_minor, pressure;
 
-  scoped_array<bool> has_zero_area(new bool[n_fs]);
+  std::unique_ptr<bool[]> has_zero_area(new bool[n_fs]);
 
   for (size_t i = 0; i < n_fs; i++) {
     bool no_orientation = hwprops->orientation_maximum == 0;
@@ -387,14 +386,14 @@ TEST(ScalingFilterInterpreterTest, TouchMajorAndMinorTest) {
     -31,  // orientation minimum
     32,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    0, 0, 0  //t5r2, semi, button pad
+    0, 0, 0, 1  //t5r2, semi, button pad
   };
   HardwareProperties expected_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
     1.0, 1.0, 25.4, 25.4, // x res, y res, x DPI, y DPI
     -M_PI * 31 / 64,  // orientation minimum (1 tick above X-axis)
     M_PI_2,   // orientation maximum
-    2, 5, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 5, 0, 0, 0, 1  // max_fingers, max_touch, t5r2, semi_mt,
   };
 
   // Test 1: Touch major and touch minor scaling with orientation

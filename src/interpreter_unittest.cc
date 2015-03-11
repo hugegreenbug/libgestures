@@ -4,15 +4,14 @@
 
 #include <string>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "activity_replay.h"
-#include "gestures.h"
-#include "interpreter.h"
-#include "prop_registry.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/activity_replay.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/interpreter.h"
+#include "gestures/include/prop_registry.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::string;
 
@@ -89,7 +88,7 @@ TEST(InterpreterTest, SimpleTest) {
     1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  //t5r2, semi, button pad
+    1, 0, 0, 0  //t5r2, semi, button pad
   };
 
   TestInterpreterWrapper wrapper(base_interpreter, &hwprops);

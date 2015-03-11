@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "fling_stop_filter_interpreter.h"
-#include "gestures.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/fling_stop_filter_interpreter.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

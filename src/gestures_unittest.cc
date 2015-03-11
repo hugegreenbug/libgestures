@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
-#include <base/memory/scoped_ptr.h>
 #include <gtest/gtest.h>
+#include <memory>
+#include <stdio.h>
 
-#include "gestures.h"
+#include "gestures/include/macros.h"
+#include "gestures/include/gestures.h"
 
 namespace gestures {
 
@@ -160,7 +161,7 @@ TEST(GesturesTest, GestureEqTest) {
 
 TEST(GesturesTest, SimpleTest) {
   // Simple allocate/free test
-  scoped_ptr<GestureInterpreter> gs(NewGestureInterpreter());
+  std::unique_ptr<GestureInterpreter> gs(NewGestureInterpreter());
   EXPECT_NE(static_cast<GestureInterpreter*>(NULL), gs.get());
   EXPECT_EQ(static_cast<Interpreter*>(NULL), gs.get()->interpreter());
 }
@@ -251,10 +252,10 @@ TEST(GesturesTest, HardwarePropertiesToStringTest) {
     2,   // orientation maximum
     12,  // max fingers
     11,  // max touches
-    0, 1, 1  // t5r2, semi-mt, is_button_pad
+    0, 1, 1, 0  // t5r2, semi-mt, is_button_pad, has_wheel
   };
   string str = hp.String();
-  LOG(INFO) << "str:" << str;
+  fprintf(stderr, "str: %s\n", str.c_str());
   // expect all these numbers in order
   const char* expected[] = {
     "1009.5",

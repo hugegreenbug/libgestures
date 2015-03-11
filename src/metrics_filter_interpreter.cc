@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "metrics_filter_interpreter.h"
+#include "gestures/include/metrics_filter_interpreter.h"
 
 #include <cmath>
 
-#include "filter_interpreter.h"
-#include "finger_metrics.h"
-#include "gestures.h"
-#include "logging.h"
-#include "prop_registry.h"
-#include "tracer.h"
-#include "util.h"
+#include "gestures/include/filter_interpreter.h"
+#include "gestures/include/finger_metrics.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/prop_registry.h"
+#include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 
@@ -22,9 +22,9 @@ MetricsFilterInterpreter::MetricsFilterInterpreter(
     Tracer* tracer,
     GestureInterpreterDeviceClass devclass)
     : FilterInterpreter(NULL, next, tracer, false),
-      devclass_(devclass),
-      history_mm_(kMaxFingers),
       mstate_mm_(kMaxFingers * MState::MaxHistorySize()),
+      history_mm_(kMaxFingers),
+      devclass_(devclass),
       mouse_movement_session_index_(0),
       mouse_movement_current_session_length(0),
       mouse_movement_current_session_start(0),

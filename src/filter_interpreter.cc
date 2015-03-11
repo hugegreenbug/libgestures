@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "filter_interpreter.h"
+#include "gestures/include/filter_interpreter.h"
 
-#include <base/values.h>
+#include <json/value.h>
 
 namespace gestures {
 
@@ -30,10 +30,10 @@ void FilterInterpreter::ConsumeGesture(const Gesture& gesture) {
   ProduceGesture(gesture);
 }
 
-DictionaryValue* FilterInterpreter::EncodeCommonInfo() {
-  DictionaryValue *root = Interpreter::EncodeCommonInfo();
+Json::Value FilterInterpreter::EncodeCommonInfo() {
+  Json::Value root = Interpreter::EncodeCommonInfo();
 #ifdef DEEP_LOGS
-  root->Set(ActivityLog::kKeyNext, next_->EncodeCommonInfo());
+  root[ActivityLog::kKeyNext] = next_->EncodeCommonInfo();
 #endif
   return root;
 }

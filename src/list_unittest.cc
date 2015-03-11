@@ -5,11 +5,10 @@
 #include <algorithm>
 #include <set>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "list.h"
-#include "set.h"
+#include "gestures/include/list.h"
+#include "gestures/include/set.h"
 
 namespace gestures {
 

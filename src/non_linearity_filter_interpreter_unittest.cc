@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "non_linearity_filter_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/non_linearity_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 const char kTestNonlinearData[] =
     "data/non_linearity_data/testing_non_linearity_data.dat";

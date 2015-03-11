@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "iir_filter_interpreter.h"
-#include "unittest_util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/iir_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
 
 namespace gestures {
 
@@ -114,7 +113,7 @@ TEST(IirFilterInterpreterTest, SemiMTIIRTest) {
     1.0, 1.0, 25.4, 25.4, // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 3, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 

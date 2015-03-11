@@ -5,16 +5,16 @@
 #include <deque>
 #include <math.h>
 #include <set>
+#include <stdio.h>
 #include <utility>
 #include <vector>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "lookahead_filter_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/lookahead_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::deque;
 using std::pair;
@@ -90,7 +90,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
 
 TEST(LookaheadFilterInterpreterTest, SimpleTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -100,7 +100,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -238,7 +238,7 @@ TEST(LookaheadFilterInterpreterTest, VariableDelayTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     5, 5,  // max fingers, max_touch,
-    0, 0, 0  // t5r2, semi, button pad
+    0, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -313,7 +313,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     5, 5,  // max fingers, max_touch
-    0, 0, 0  // t5r2, semi, button pad
+    0, 0, 0, 0  // t5r2, semi, button pad
   };
 
   FingerState fs[] = {
@@ -356,7 +356,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
 // that remains.
 TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -366,7 +366,7 @@ TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -417,7 +417,7 @@ TEST(LookaheadFilterInterpreterTest, TimeGoesBackwardsTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -500,7 +500,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateHwStateTest) {
 
 TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -510,7 +510,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -579,7 +579,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
 
 TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 10, 10,  // left, top, right, bottom
@@ -589,7 +589,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -621,6 +621,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
               2));  // dy
   interpreter.reset(new LookaheadFilterInterpreter(
       NULL, base_interpreter, NULL));
+  interpreter->min_delay_.val_ = 0.017;
   wrapper.Reset(interpreter.get());
 
   stime_t timeout = -1.0;
@@ -651,7 +652,7 @@ struct HardwareStateLastId {
 
 TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -661,7 +662,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -725,7 +726,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
 
 TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -735,7 +736,7 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 0, 0  // t5r2, semi, button pad
+    1, 0, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -819,7 +820,7 @@ struct QuickSwipeTestInputs {
 // don't drumroll-separate the fingers.
 TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0.000000,  // left edge
@@ -836,7 +837,8 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
     5,  // max touch
     1,  // t5r2
     0,  // semi-mt
-    1   // is button pad
+    1,   // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -913,7 +915,7 @@ struct CyapaDrumrollTestInputs {
 // Doug Anderson.
 TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
     0.000000,  // left edge
@@ -930,7 +932,8 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    0  // is button pad
+    0,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -1137,7 +1140,8 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    0  // is button pad
+    0,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -1172,7 +1176,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
       while (timeout >= 0 && (now + timeout) < next_timestamp) {
         now += timeout;
         timeout = -1;
-        LOG(INFO) << "calling handler timer: " << now;
+        fprintf(stderr, "calling handler timer: %f\n", now);
         interpreter.HandleTimer(now, &timeout);
       }
     }
@@ -1181,7 +1185,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
 
 TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<LookaheadFilterInterpreter> interpreter;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -1191,7 +1195,7 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    1, 1, 0  // t5r2, semi, button pad
+    1, 1, 0, 0  // t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &hwprops);
 

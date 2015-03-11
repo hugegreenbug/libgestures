@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fling_stop_filter_interpreter.h"
+#include "gestures/include/fling_stop_filter_interpreter.h"
 
-#include "util.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

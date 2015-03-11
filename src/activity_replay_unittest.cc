@@ -6,16 +6,15 @@
 #include <string>
 #include <vector>
 
-#include <base/command_line.h>
-#include <base/file_util.h>
-#include <base/logging.h>
-#include <base/string_split.h>
 #include <gtest/gtest.h>
 
-#include "activity_replay.h"
-#include "finger_metrics.h"
-#include "logging_filter_interpreter.h"
-#include "gestures.h"
+#include "gestures/include/activity_replay.h"
+#include "gestures/include/command_line.h"
+#include "gestures/include/file_util.h"
+#include "gestures/include/finger_metrics.h"
+#include "gestures/include/logging_filter_interpreter.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/string_util.h"
 
 using std::string;
 
@@ -37,13 +36,13 @@ TEST(ActivityReplayTest, DISABLED_SimpleTest) {
     MetricsProperties mprops(prop_reg);
 
     string log_contents;
-    ASSERT_TRUE(file_util::ReadFileToString(cl->GetSwitchValuePath("in"),
-                                            &log_contents));
+    ASSERT_TRUE(ReadFileToString(cl->GetSwitchValueASCII("in").c_str(),
+                                 &log_contents));
 
     ActivityReplay replay(prop_reg);
     std::vector<string> honor_props;
     if (cl->GetSwitchValueASCII("only_honor")[0])
-      base::SplitString(cl->GetSwitchValueASCII("only_honor"),
+      SplitString(cl->GetSwitchValueASCII("only_honor"),
                         ',', &honor_props);
     std::set<string> honor_props_set(honor_props.begin(), honor_props.end());
     replay.Parse(log_contents, honor_props_set);

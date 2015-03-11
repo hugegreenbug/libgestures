@@ -4,15 +4,15 @@
 
 #include <deque>
 #include <math.h>
+#include <stdio.h>
 #include <vector>
 #include <utility>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "palm_classifying_filter_interpreter.h"
-#include "unittest_util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/palm_classifying_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
 
 using std::deque;
 using std::make_pair;
@@ -59,7 +59,8 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -136,7 +137,8 @@ TEST(PalmClassifyingFilterInterpreterTest, StationaryPalmTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -177,7 +179,7 @@ TEST(PalmClassifyingFilterInterpreterTest, StationaryPalmTest) {
 
 TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
   PalmClassifyingFilterInterpreterTestInterpreter* base_interpreter = NULL;
-  scoped_ptr<PalmClassifyingFilterInterpreter> pci(
+  std::unique_ptr<PalmClassifyingFilterInterpreter> pci(
       new PalmClassifyingFilterInterpreter(NULL, NULL, NULL));
   HardwareProperties hwprops = {
     0,  // left edge
@@ -194,7 +196,8 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(pci.get(), &hwprops);
 
@@ -288,7 +291,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
         ADD_FAILURE() << "Should be unreached.";
         break;
     }
-    LOG(INFO) << "iteration i = " << i;
+    fprintf(stderr, "iteration i = %zd\n", i);
     wrapper.SyncInterpret(&hardware_state[i], NULL);
   }
 }
@@ -317,7 +320,8 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmReevaluateTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -405,7 +409,8 @@ TEST(PalmClassifyingFilterInterpreterTest, LargeTouchMajorTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0  // has_wheel
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 

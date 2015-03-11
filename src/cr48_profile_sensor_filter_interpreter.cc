@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "cr48_profile_sensor_filter_interpreter.h"
+#include "gestures/include/cr48_profile_sensor_filter_interpreter.h"
 
 #include <math.h>
 
-#include "gestures.h"
-#include "interpreter.h"
-#include "logging.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/interpreter.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

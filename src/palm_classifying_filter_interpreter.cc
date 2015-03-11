@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "palm_classifying_filter_interpreter.h"
+#include "gestures/include/palm_classifying_filter_interpreter.h"
 
-#include <base/memory/scoped_ptr.h>
-
-#include "gestures.h"
-#include "interpreter.h"
-#include "tracer.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/interpreter.h"
+#include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

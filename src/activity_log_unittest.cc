@@ -4,12 +4,11 @@
 
 #include <string>
 
-#include <base/logging.h>
-#include <base/memory/scoped_ptr.h>
 #include <gtest/gtest.h>
 
-#include "activity_log.h"
-#include "prop_registry.h"
+#include "gestures/include/activity_log.h"
+#include "gestures/include/macros.h"
+#include "gestures/include/prop_registry.h"
 
 using std::string;
 
@@ -49,7 +48,8 @@ TEST(ActivityLogTest, SimpleTest) {
     6022,  // max touch
     1,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad,
+    0   // has wheel
   };
 
   log.SetHardwareProperties(hwprops);

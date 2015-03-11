@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
 #include <deque>
 #include <vector>
 
-#include "gestures.h"
-#include "cr48_profile_sensor_filter_interpreter.h"
-#include "unittest_util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/cr48_profile_sensor_filter_interpreter.h"
+#include "gestures/include/unittest_util.h"
 
 using std::deque;
 using std::make_pair;
@@ -103,7 +102,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, LowPressureTest) {
     1.0, 1.0, 25.4, 25.4,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 3, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
 
   hwprops.support_semi_mt = true;
@@ -158,7 +157,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, TrackingIdMappingTest) {
     1.0, 1.0, 25.4, 25.4,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 3, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
 
   hwprops.support_semi_mt = true;
@@ -207,7 +206,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, CorrectFingerPositionTest) {
     1.0, 1.0, 25.4, 25.4,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 3, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
 
   hwprops.support_semi_mt = true;
@@ -300,7 +299,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, FingerCrossOverTest) {
     1.0, 1.0, 25.4, 25.4,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
+    2, 3, 0, 0, 0, 0  // max_fingers, max_touch, t5r2, semi_mt,
   };
 
   size_t hwstate_index_finger_crossed = 6;
@@ -496,7 +495,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, MovingFingerTest) {
     1.0, 1.0, 133, 133,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 1, 1  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
+    2, 3, 0, 1, 1, 0  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -547,7 +546,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, HistoryTest) {
     1.0, 1.0, 133, 133,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 1, 1  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
+    2, 3, 0, 1, 1, 0  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -605,7 +604,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, TwoToOneJumpTest) {
     1.0, 1.0, 133, 133,  // x res, y res, x DPI, y DPI
     -1,  // orientation minimum
     2,   // orientation maximum
-    2, 3, 0, 1, 1  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
+    2, 3, 0, 1, 1, 0  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -666,7 +665,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, OneToTwoJumpTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 3,  // max_fingers, max_touch
-    false, true, true  // t5r2, semi_mt, is_button_pad
+    false, true, true, false  // t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -726,7 +725,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, WarpOnSwapTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 3,  // max_fingers, max_touch
-    false, true, true,  // t5r2, semi_mt, is_button_pad
+    false, true, true, false  // t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -779,7 +778,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, SensorJumpTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 3,  // max_fingers, max_touch
-    false, true, true  // t5r2, semi_mt, is_button_pad
+    false, true, true, false  // t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -847,7 +846,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, BigJumpTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 3,  // max_fingers, max_touch
-    false, true, true  // t5r2, semi_mt, is_button_pad
+    false, true, true, false  // t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -906,7 +905,7 @@ TEST(Cr48ProfileSensorFilterInterpreterTest, FastMoveTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 3,  // max_fingers, max_touch
-    false, true, true  // t5r2, semi_mt, is_button_pad
+    false, true, true, false  // t5r2, semi_mt, is_button_pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);

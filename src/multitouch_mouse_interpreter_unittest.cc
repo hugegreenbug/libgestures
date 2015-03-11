@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "multitouch_mouse_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/multitouch_mouse_interpreter.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 
@@ -25,7 +25,7 @@ TEST(MultitouchMouseInterpreterTest, SimpleTest) {
     -1,  // orientation minimum
     2,   // orientation maximum
     2, 5,  // max fingers, max_touch
-    0, 0, 0  //t5r2, semi, button pad
+    0, 0, 0, 0  //t5r2, semi, button pad
   };
   TestInterpreterWrapper wrapper(&mi, &hwprops);
 

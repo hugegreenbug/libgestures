@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "scaling_filter_interpreter.h"
+#include "gestures/include/scaling_filter_interpreter.h"
 
 #include <math.h>
 
-#include "gestures.h"
-#include "interpreter.h"
-#include "logging.h"
-#include "tracer.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/interpreter.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/tracer.h"
 
 namespace gestures {
 
@@ -18,7 +18,6 @@ ScalingFilterInterpreter::ScalingFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer,
     GestureInterpreterDeviceClass devclass)
     : FilterInterpreter(NULL, next, tracer, false),
-      devclass_(devclass),
       tp_x_scale_(1.0),
       tp_y_scale_(1.0),
       tp_x_translate_(0.0),
@@ -26,6 +25,7 @@ ScalingFilterInterpreter::ScalingFilterInterpreter(
       screen_x_scale_(1.0),
       screen_y_scale_(1.0),
       orientation_scale_(1.0),
+      australian_scrolling_(prop_reg, "Australian Scrolling", false),
       surface_area_from_pressure_(prop_reg,
                                   "Compute Surface Area from Pressure", true),
       tp_x_bias_(prop_reg, "Touchpad Device Output Bias on X-Axis", 0.0),
@@ -33,6 +33,10 @@ ScalingFilterInterpreter::ScalingFilterInterpreter(
       pressure_scale_(prop_reg, "Pressure Calibration Slope", 1.0),
       pressure_translate_(prop_reg, "Pressure Calibration Offset", 0.0),
       pressure_threshold_(prop_reg, "Pressure Minimum Threshold", 0.0),
+      force_touch_count_to_match_finger_count_(
+          prop_reg,
+          "Force Touch Count To Match Finger Count",
+          0),
       mouse_cpi_(prop_reg, "Mouse CPI", 1000.0),
       device_mouse_(prop_reg, "Device Mouse", IsMouseDevice(devclass)),
       device_touchpad_(prop_reg,
@@ -100,21 +104,15 @@ bool ScalingFilterInterpreter::IsMouseDevice(
 bool ScalingFilterInterpreter::IsTouchpadDevice(
     GestureInterpreterDeviceClass devclass) {
   return (devclass == GESTURES_DEVCLASS_TOUCHPAD ||
-          devclass == GESTURES_DEVCLASS_MULTITOUCH_MOUSE);
+          devclass == GESTURES_DEVCLASS_MULTITOUCH_MOUSE ||
+          devclass == GESTURES_DEVCLASS_TOUCHSCREEN);
 }
 
 void ScalingFilterInterpreter::ScaleHardwareState(HardwareState* hwstate) {
-  if (devclass_ == GESTURES_DEVCLASS_TOUCHPAD ||
-      devclass_ == GESTURES_DEVCLASS_TOUCHSCREEN) {
+  if (device_touchpad_.val_)
     ScaleTouchpadHardwareState(hwstate);
-  } else if (devclass_ == GESTURES_DEVCLASS_MOUSE) {
+  if (device_mouse_.val_)
     ScaleMouseHardwareState(hwstate);
-  } else if (devclass_ == GESTURES_DEVCLASS_MULTITOUCH_MOUSE) {
-    ScaleTouchpadHardwareState(hwstate);
-    ScaleMouseHardwareState(hwstate);
-  } else {
-    Err("Couldn't recognize devclass: %d", devclass_);
-  }
 }
 
 void ScalingFilterInterpreter::ScaleMouseHardwareState(
@@ -126,6 +124,9 @@ void ScalingFilterInterpreter::ScaleMouseHardwareState(
 
 void ScalingFilterInterpreter::ScaleTouchpadHardwareState(
     HardwareState* hwstate) {
+  if (force_touch_count_to_match_finger_count_.val_)
+    hwstate->touch_cnt = hwstate->finger_cnt;
+
   if (surface_area_from_pressure_.val_) {
     // Drop the small fingers, i.e. low pressures.
     FilterLowPressure(hwstate);
@@ -200,23 +201,63 @@ void ScalingFilterInterpreter::ScaleTouchpadHardwareState(
 void ScalingFilterInterpreter::ConsumeGesture(const Gesture& gs) {
   Gesture copy = gs;
   switch (copy.type) {
-    case kGestureTypeMove:
+    case kGestureTypeMove: {
+      int original_rel_x =
+          copy.details.move.ordinal_dx * mouse_cpi_.val_ / 25.4;
+      int original_rel_y =
+          copy.details.move.ordinal_dy * mouse_cpi_.val_ / 25.4;
       copy.details.move.dx *= screen_x_scale_;
       copy.details.move.dy *= screen_y_scale_;
       copy.details.move.ordinal_dx *= screen_x_scale_;
       copy.details.move.ordinal_dy *= screen_y_scale_;
+      // Special case of motion: if a mouse move of 1 device unit
+      // (rel_[xy] == 1) would move the cursor on the screen > 1
+      // pixel, force it to just one pixel. This prevents low-DPI mice
+      // from jumping 2 pixels at a time when doing slow moves.
+      // Note, we use 1 / 1.2 = 0.8333 instead of 1 for the number of
+      // screen pixels, as external monitors get a 20% distance boost.
+      // Mice are most commonly used w/ external displays.
+      if (device_mouse_.val_ &&
+          ((original_rel_x == 0) != (original_rel_y == 0))) {
+        const double kMinPixels = 1.0 / 1.2;
+        if (fabs(copy.details.move.dx) > kMinPixels &&
+            abs(original_rel_x) == 1) {
+          copy.details.move.dx = copy.details.move.ordinal_dx =
+              copy.details.move.dx > 0.0 ? kMinPixels : -kMinPixels;
+        }
+        if (fabs(copy.details.move.dy) > kMinPixels &&
+            abs(original_rel_y) == 1) {
+          copy.details.move.dy = copy.details.move.ordinal_dy =
+              copy.details.move.dy > 0.0 ? kMinPixels : -kMinPixels;
+        }
+      }
       break;
+    }
     case kGestureTypeScroll:
-      copy.details.scroll.dx *= screen_x_scale_;
-      copy.details.scroll.dy *= screen_y_scale_;
-      copy.details.scroll.ordinal_dx *= screen_x_scale_;
-      copy.details.scroll.ordinal_dy *= screen_y_scale_;
+      if (!(device_mouse_.val_ && !device_touchpad_.val_)) {
+        copy.details.scroll.dx *= screen_x_scale_;
+        copy.details.scroll.dy *= screen_y_scale_;
+        copy.details.scroll.ordinal_dx *= screen_x_scale_;
+        copy.details.scroll.ordinal_dy *= screen_y_scale_;
+      }
+      if (!australian_scrolling_.val_) {
+        copy.details.scroll.dx *= -1;
+        copy.details.scroll.dy *= -1;
+        copy.details.scroll.ordinal_dx *= -1;
+        copy.details.scroll.ordinal_dy *= -1;
+      }
       break;
     case kGestureTypeFling:
       copy.details.fling.vx *= screen_x_scale_;
       copy.details.fling.vy *= screen_y_scale_;
       copy.details.fling.ordinal_vx *= screen_x_scale_;
       copy.details.fling.ordinal_vy *= screen_y_scale_;
+      if (!australian_scrolling_.val_) {
+        copy.details.fling.vx *= -1;
+        copy.details.fling.vy *= -1;
+        copy.details.fling.ordinal_vx *= -1;
+        copy.details.fling.ordinal_vy *= -1;
+      }
       break;
     case kGestureTypeSwipe:
       // Scale swipes, as we want them to follow the pointer speed.
@@ -224,6 +265,10 @@ void ScalingFilterInterpreter::ConsumeGesture(const Gesture& gs) {
       copy.details.swipe.dy *= screen_y_scale_;
       copy.details.swipe.ordinal_dx *= screen_x_scale_;
       copy.details.swipe.ordinal_dy *= screen_y_scale_;
+      if (!australian_scrolling_.val_) {
+        copy.details.swipe.dy *= -1;
+        copy.details.swipe.ordinal_dy *= -1;
+      }
       break;
     default:
       break;
@@ -278,7 +323,8 @@ void ScalingFilterInterpreter::Initialize(const HardwareProperties* hwprops,
     hwprops->max_touch_cnt,
     hwprops->supports_t5r2,
     hwprops->support_semi_mt,
-    hwprops->is_button_pad
+    hwprops->is_button_pad,
+    hwprops->has_wheel
   };
   // current metrics is no longer valid, pass metrics=NULL
   FilterInterpreter::Initialize(&friendly_props_, NULL, mprops, consumer);

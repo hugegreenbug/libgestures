@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "finger_merge_filter_interpreter.h"
+#include "gestures/include/finger_merge_filter_interpreter.h"
 
 #include <cmath>
 
-#include "filter_interpreter.h"
-#include "gestures.h"
-#include "logging.h"
-#include "prop_registry.h"
-#include "tracer.h"
+#include "gestures/include/filter_interpreter.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/prop_registry.h"
+#include "gestures/include/tracer.h"
 
 namespace gestures {
 

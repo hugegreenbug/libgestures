@@ -2,28 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "interpreter.h"
+#include "gestures/include/interpreter.h"
 
 #include <cxxabi.h>
 #include <string>
 
-#include <base/json/json_writer.h>
-#include <base/values.h>
+#include <json/value.h>
+#include <json/writer.h>
 
-#include "activity_log.h"
-#include "finger_metrics.h"
-#include "gestures.h"
-#include "logging.h"
-#include "tracer.h"
+#include "gestures/include/activity_log.h"
+#include "gestures/include/finger_metrics.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/tracer.h"
 
+using std::string;
 
 namespace gestures {
 
 Interpreter::Interpreter(PropRegistry* prop_reg,
                          Tracer* tracer,
                          bool force_logging)
-    : log_(NULL),
-      requires_metrics_(false),
+    : requires_metrics_(false),
       initialized_(false),
       name_(NULL),
       tracer_(tracer) {
@@ -103,25 +103,19 @@ void Interpreter::Initialize(const HardwareProperties* hwprops,
   initialized_ = true;
 }
 
-DictionaryValue* Interpreter::EncodeCommonInfo() {
-  DictionaryValue* root = log_.get() ?
-      log_->EncodeCommonInfo() : new DictionaryValue;
-  root->Set(ActivityLog::kKeyInterpreterName,
-            new StringValue(std::string(name())));
+Json::Value Interpreter::EncodeCommonInfo() {
+  Json::Value root = log_.get() ?
+      log_->EncodeCommonInfo() : Json::Value(Json::objectValue);
+  root[ActivityLog::kKeyInterpreterName] = Json::Value(string(name()));
   return root;
 }
 
 std::string Interpreter::Encode() {
-  DictionaryValue *root;
-  root = EncodeCommonInfo();
+  Json::Value root = EncodeCommonInfo();
   if (log_.get())
-    root = log_->AddEncodeInfo(root);
+    log_->AddEncodeInfo(&root);
 
-  std::string out;
-  base::JSONWriter::WriteWithOptions(root,
-                                     base::JSONWriter::OPTIONS_PRETTY_PRINT,
-                                     &out);
-  delete root;
+  std::string out = root.toStyledString();
   return out;
 }
 

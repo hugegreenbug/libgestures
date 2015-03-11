@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "set.h"
+#include "gestures/include/set.h"
 
 namespace gestures {
 

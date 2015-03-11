@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 #include <stdarg.h>
+#include <stdio.h>
 
-#include <base/command_line.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
+#include "gestures/include/command_line.h"
+#include "gestures/include/gestures.h"
 
 int main(int argc, char **argv) {
-  CommandLine::Init(argc, argv);
+  gestures::CommandLine::Init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

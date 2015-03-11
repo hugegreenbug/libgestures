@@ -7,13 +7,13 @@
 #include <utility>
 #include <vector>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "accel_filter_interpreter.h"
-#include "gestures.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/accel_filter_interpreter.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/macros.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::deque;
 using std::make_pair;
@@ -249,21 +249,22 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
   accel_interpreter.min_reasonable_dt_.val_ = 0.0;
   accel_interpreter.max_reasonable_dt_.val_ = INFINITY;
 
-  accel_interpreter.pointer_sensitivity_.val_ = 0;  // custom sensitivity
-  accel_interpreter.scroll_sensitivity_.val_ = 0;  // custom sensitivity
-  accel_interpreter.custom_point_[0] =
+  // custom sensitivity
+  accel_interpreter.use_custom_tp_point_curve_.val_ = 1;
+  accel_interpreter.use_custom_tp_scroll_curve_.val_ = 1;
+  accel_interpreter.tp_custom_point_[0] =
       AccelFilterInterpreter::CurveSegment(2.0, 0.0, 0.5, 0.0);
-  accel_interpreter.custom_point_[1] =
+  accel_interpreter.tp_custom_point_[1] =
       AccelFilterInterpreter::CurveSegment(3.0, 0.0, 2.0, -3.0);
-  accel_interpreter.custom_point_[2] =
+  accel_interpreter.tp_custom_point_[2] =
       AccelFilterInterpreter::CurveSegment(INFINITY, 0.0, 0.0, 3.0);
-  accel_interpreter.custom_scroll_[0] =
+  accel_interpreter.tp_custom_scroll_[0] =
       AccelFilterInterpreter::CurveSegment(0.5, 0.0, 2.0, 0.0);
-  accel_interpreter.custom_scroll_[1] =
+  accel_interpreter.tp_custom_scroll_[1] =
       AccelFilterInterpreter::CurveSegment(1.0, 0.0, 2.0, 0.0);
-  accel_interpreter.custom_scroll_[2] =
+  accel_interpreter.tp_custom_scroll_[2] =
       AccelFilterInterpreter::CurveSegment(2.0, 0.0, 0.0, 2.0);
-  accel_interpreter.custom_scroll_[3] =
+  accel_interpreter.tp_custom_scroll_[3] =
       AccelFilterInterpreter::CurveSegment(INFINITY, 0.0, 2.0, -2.0);
 
   float move_in[]  = { 1.0, 2.5, 3.5, 5.0 };

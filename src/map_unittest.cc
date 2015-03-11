@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #include <map>
+#include <stdarg.h>
 #include <utility>
 
-#include <base/logging.h>
 #include <gtest/gtest.h>
 
-#include "map.h"
+#include "gestures/include/map.h"
 
 using std::pair;
 using std::make_pair;

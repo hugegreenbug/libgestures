@@ -2,45 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures.h"
+#include "gestures/include/gestures.h"
 
 #include <cstring>
 #include <sys/time.h>
 
-#include <base/stringprintf.h>
-
-#include "accel_filter_interpreter.h"
-#include "box_filter_interpreter.h"
-#include "click_wiggle_filter_interpreter.h"
-#include "finger_merge_filter_interpreter.h"
-#include "finger_metrics.h"
-#include "fling_stop_filter_interpreter.h"
-#include "iir_filter_interpreter.h"
-#include "immediate_interpreter.h"
-#include "integral_gesture_filter_interpreter.h"
-#include "logging.h"
-#include "logging_filter_interpreter.h"
-#include "lookahead_filter_interpreter.h"
-#include "metrics_filter_interpreter.h"
-#include "mouse_interpreter.h"
-#include "multitouch_mouse_interpreter.h"
-#include "non_linearity_filter_interpreter.h"
-#include "palm_classifying_filter_interpreter.h"
-#include "prop_registry.h"
-#include "scaling_filter_interpreter.h"
-#include "stationary_wiggle_filter_interpreter.h"
-#include "cr48_profile_sensor_filter_interpreter.h"
-#include "sensor_jump_filter_interpreter.h"
-#include "split_correcting_filter_interpreter.h"
-#include "stuck_button_inhibitor_filter_interpreter.h"
-#include "t5r2_correcting_filter_interpreter.h"
-#include "trace_marker.h"
-#include "tracer.h"
-#include "trend_classifying_filter_interpreter.h"
-#include "util.h"
+#include "gestures/include/accel_filter_interpreter.h"
+#include "gestures/include/box_filter_interpreter.h"
+#include "gestures/include/click_wiggle_filter_interpreter.h"
+#include "gestures/include/finger_merge_filter_interpreter.h"
+#include "gestures/include/finger_metrics.h"
+#include "gestures/include/fling_stop_filter_interpreter.h"
+#include "gestures/include/iir_filter_interpreter.h"
+#include "gestures/include/immediate_interpreter.h"
+#include "gestures/include/integral_gesture_filter_interpreter.h"
+#include "gestures/include/logging.h"
+#include "gestures/include/logging_filter_interpreter.h"
+#include "gestures/include/lookahead_filter_interpreter.h"
+#include "gestures/include/metrics_filter_interpreter.h"
+#include "gestures/include/mouse_interpreter.h"
+#include "gestures/include/multitouch_mouse_interpreter.h"
+#include "gestures/include/non_linearity_filter_interpreter.h"
+#include "gestures/include/palm_classifying_filter_interpreter.h"
+#include "gestures/include/prop_registry.h"
+#include "gestures/include/scaling_filter_interpreter.h"
+#include "gestures/include/stationary_wiggle_filter_interpreter.h"
+#include "gestures/include/cr48_profile_sensor_filter_interpreter.h"
+#include "gestures/include/sensor_jump_filter_interpreter.h"
+#include "gestures/include/split_correcting_filter_interpreter.h"
+#include "gestures/include/string_util.h"
+#include "gestures/include/stuck_button_inhibitor_filter_interpreter.h"
+#include "gestures/include/t5r2_correcting_filter_interpreter.h"
+#include "gestures/include/trace_marker.h"
+#include "gestures/include/tracer.h"
+#include "gestures/include/trend_classifying_filter_interpreter.h"
+#include "gestures/include/util.h"
 
 using std::string;
 using std::min;
+using gestures::StringPrintf;
+using gestures::StartsWithASCII;
 
 // C API:
 
@@ -399,8 +400,7 @@ GestureInterpreter::GestureInterpreter(int version)
       timer_provider_(NULL),
       timer_provider_data_(NULL),
       interpret_timer_(NULL),
-      loggingFilter_(NULL),
-      consumer_(NULL) {
+      loggingFilter_(NULL) {
   prop_reg_.reset(new PropRegistry);
   tracer_.reset(new Tracer(prop_reg_.get(), TraceMarker::StaticTraceWrite));
   TraceMarker::CreateTraceMarker();
@@ -495,6 +495,14 @@ void GestureInterpreter::set_callback(GestureReadyFunction callback,
 }
 
 void GestureInterpreter::InitializeTouchpad(void) {
+  if (prop_reg_.get()) {
+    IntProperty stack_version(prop_reg_.get(), "Touchpad Stack Version", 2);
+    if (stack_version.val_ == 2) {
+      InitializeTouchpad2();
+      return;
+    }
+  }
+
   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
@@ -516,7 +524,6 @@ void GestureInterpreter::InitializeTouchpad(void) {
   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
                                       GESTURES_DEVCLASS_TOUCHPAD);
   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
-  temp = new IntegralGestureFilterInterpreter(temp, tracer_.get());
   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
   temp = new T5R2CorrectingFilterInterpreter(prop_reg_.get(), temp,
                                              tracer_.get());
@@ -530,12 +537,40 @@ void GestureInterpreter::InitializeTouchpad(void) {
   temp = NULL;
 }
 
+void GestureInterpreter::InitializeTouchpad2(void) {
+  Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
+  temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new PalmClassifyingFilterInterpreter(prop_reg_.get(), temp,
+                                              tracer_.get());
+  temp = new LookaheadFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new BoxFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new StationaryWiggleFilterInterpreter(prop_reg_.get(), temp,
+                                               tracer_.get());
+  temp = new AccelFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new TrendClassifyingFilterInterpreter(prop_reg_.get(), temp,
+                                               tracer_.get());
+  temp = new MetricsFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
+                                      GESTURES_DEVCLASS_TOUCHPAD);
+  temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
+                                      GESTURES_DEVCLASS_TOUCHPAD);
+  temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+  temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
+  temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
+                                                       tracer_.get());
+  interpreter_.reset(temp);
+  temp = NULL;
+}
+
 void GestureInterpreter::InitializeMouse(void) {
   Interpreter* temp = new MouseInterpreter(prop_reg_.get(), tracer_.get());
   // TODO(clchiou;chromium-os:36321): Use mouse acceleration algorithm for mice
   temp = new AccelFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
                                       GESTURES_DEVCLASS_MOUSE);
+  temp = new MetricsFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
+                                      GESTURES_DEVCLASS_MOUSE);
+  temp = new IntegralGestureFilterInterpreter(temp, tracer_.get());
   temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
                                                        tracer_.get());
   interpreter_.reset(temp);

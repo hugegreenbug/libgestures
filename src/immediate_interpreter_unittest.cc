@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdio.h>
 #include <vector>
 
-#include <base/logging.h>
-#include <base/stringprintf.h>
 #include <gtest/gtest.h>
 
-#include "gestures.h"
-#include "immediate_interpreter.h"
-#include "unittest_util.h"
-#include "util.h"
+#include "gestures/include/gestures.h"
+#include "gestures/include/immediate_interpreter.h"
+#include "gestures/include/string_util.h"
+#include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 
@@ -37,7 +37,8 @@ TEST(ImmediateInterpreterTest, MoveDownTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -98,7 +99,8 @@ TEST(ImmediateInterpreterTest, MoveUpWithRestingThumbTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -161,7 +163,8 @@ TEST(ImmediateInterpreterTest, SemiMtScrollUpWithRestingThumbTest) {
     3,  // max touch
     0,  // tripletap
     1,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -219,7 +222,8 @@ void ScrollUpTest(float pressure_a, float pressure_b) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -290,7 +294,8 @@ TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -358,7 +363,8 @@ TEST(ImmediateInterpreterTest, FlingTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -469,7 +475,8 @@ TEST(ImmediateInterpreterTest, DelayedStartScrollTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -527,7 +534,8 @@ TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -573,7 +581,7 @@ TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
 
   gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
   if (gs) {
-    LOG(INFO)<< "gs:" << gs->String() << "i=" << idx;
+    fprintf(stderr, "gs:%si=%zd\n", gs->String().c_str(), idx);
     EXPECT_NE(kGestureTypeScroll, gs->type);
   }
 }
@@ -599,7 +607,8 @@ TEST(ImmediateInterpreterTest, OneFingerThenTwoDelayedStartScrollTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -662,7 +671,7 @@ struct OneFatFingerScrollTestInputs {
 
 // Tests two scroll operations with data from actual logs from Ryan Tabone.
 TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -678,7 +687,8 @@ TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
   // 4 runs that were failing, but now pass:
@@ -828,7 +838,7 @@ struct NoLiftoffScrollTestInputs {
 // Tests that if one scrolls backwards a bit before lifting fingers off, we
 // don't scroll backwards. Based on an actual log
 TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -844,7 +854,8 @@ TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -963,7 +974,7 @@ struct HardwareStateAnScrollExpectations {
 };
 
 TEST(ImmediateInterpreterTest, DiagonalSnapTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -979,7 +990,8 @@ TEST(ImmediateInterpreterTest, DiagonalSnapTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -1062,7 +1074,7 @@ TEST(ImmediateInterpreterTest, DiagonalSnapTest) {
 }
 
 TEST(ImmediateInterpreterTest, RestingFingerTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1078,7 +1090,8 @@ TEST(ImmediateInterpreterTest, RestingFingerTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -1145,7 +1158,8 @@ TEST(ImmediateInterpreterTest, ThumbRetainTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -1196,7 +1210,8 @@ TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -1244,7 +1259,8 @@ TEST(ImmediateInterpreterTest, SetHardwarePropertiesTwiceTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   hwprops.max_finger_cnt = 3;
   TestInterpreterWrapper wrapper(&ii, &hwprops);
@@ -1283,7 +1299,8 @@ TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1362,7 +1379,8 @@ TEST(ImmediateInterpreterTest, PressureChangeMoveTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1417,7 +1435,8 @@ TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1630,7 +1649,7 @@ const unsigned kBM = GESTURES_BUTTON_MIDDLE;
 const unsigned kBR = GESTURES_BUTTON_RIGHT;
 
 TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -1647,7 +1666,8 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2025,7 +2045,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
 
     if (hwstate && hwstate->timestamp == 0.0) {
       // Reset imm interpreter
-      LOG(INFO) << "Resetting imm interpreter, i = " << i;
+      fprintf(stderr, "Resetting imm interpreter, i = %zd\n", i);
       ii.reset(new ImmediateInterpreter(NULL, NULL));
       wrapper.Reset(ii.get());
       ii->drag_lock_enable_.val_ = 1;
@@ -2080,7 +2100,7 @@ struct TapToClickLowPressureBeginOrEndInputs {
 // location, it's still a tap. We see this happen on some hardware particularly
 // for right clicks. This is based on two logs from Ken Moore.
 TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -2096,7 +2116,8 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2166,7 +2187,7 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
 
 // Does two tap gestures, one with keyboard interference.
 TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -2183,7 +2204,8 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2239,7 +2261,7 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
 }
 
 TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -2256,7 +2278,8 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2330,7 +2353,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
       bool same_fingers = false;
       if (hwstate && hwstate->timestamp == 0.0) {
         // Reset imm interpreter
-        LOG(INFO) << "Resetting imm interpreter, i = " << i;
+        fprintf(stderr, "Resetting imm interpreter, i = %zd\n", i);
         ii.reset(new ImmediateInterpreter(NULL, NULL));
         wrapper.Reset(ii.get());
         ii->drag_lock_enable_.val_ = 1;
@@ -2411,7 +2434,8 @@ TEST(ImmediateInterpreterTest, ClickTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
   EXPECT_FLOAT_EQ(10.0, ii.tapping_finger_min_separation_.val_);
@@ -2502,7 +2526,8 @@ TEST(ImmediateInterpreterTest, BigHandsRightClickTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
   BigHandsRightClickInputAndExpectations records[] = {
     { { 1329527921.327647, 0, 2, 2, NULL, 0, 0, 0, 0 }, 0, 0,
@@ -2652,7 +2677,8 @@ TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -2755,7 +2781,8 @@ TEST(ImmediateInterpreterTest, DISABLED_PinchTests) {
     5,  // max touch
     0,  // tripletap
     0,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -2879,7 +2906,7 @@ struct AvoidAccidentalPinchTestInput {
 // These data are from real logs where a move with resting thumb was appempted,
 // but pinch code prevented it.
 TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
-  scoped_ptr<ImmediateInterpreter> ii;
+  std::unique_ptr<ImmediateInterpreter> ii;
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -2895,7 +2922,8 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
     5,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -3011,7 +3039,9 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
     if (input.flag == kS) {
       ii.reset(new ImmediateInterpreter(NULL, NULL));
       ii->pinch_enable_.val_ = true;
-      wrapper.Reset(ii.get());
+      MetricsProperties* mprops = new MetricsProperties(NULL);
+      mprops->two_finger_close_vertical_distance_thresh.val_ = 35.0;
+      wrapper.Reset(ii.get(), mprops);
     }
     // Prep inputs
     FingerState fs[] = {
@@ -3047,7 +3077,8 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
     3,  // max touch
     0,  // t5r2
     1,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
 
   const unsigned kNonPalmFlags = GESTURES_FINGER_WARP_X |
@@ -3094,7 +3125,8 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
     3,  // max touch
     0,  // t5r2
     1,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
 
   FingerState new_finger_states[] = {
@@ -3143,7 +3175,8 @@ TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
     3,  // max touch
     0,  // t5r2
     0,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_state[] = {
@@ -3217,7 +3250,8 @@ TEST(ImmediateInterpreterTest, WarpedFingersTappingTest) {
     3,  // max touch
     0,  // t5r2
     1,  // semi-mt
-    true  // is button pad
+    true,  // is button pad
+    0   // has_wheel
   };
 
   unsigned flags = GESTURES_FINGER_WARP_X_NON_MOVE |
@@ -3276,7 +3310,8 @@ TEST(ImmediateInterpreterTest, FlingDepthTest) {
     5,  // max touch
     0,  // tripletap
     1,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_states[] = {
@@ -3372,7 +3407,8 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
     3,  // max touch
     0,  // t5r2
     1,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   FingerState finger_state[] = {
@@ -3441,7 +3477,8 @@ TEST(ImmediateInterpreterTest, BasicButtonTest) {
     3,  // max touch
     0,  // t5r2
     1,  // semi-mt
-    1  // is button pad
+    1,  // is button pad
+    0   // has_wheel
   };
 
   HardwareState hardware_states[] = {

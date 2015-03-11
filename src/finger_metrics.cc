@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "finger_metrics.h"
+#include "gestures/include/finger_metrics.h"
 
 namespace gestures {
 
@@ -26,7 +26,7 @@ MetricsProperties::MetricsProperties(PropRegistry* prop_reg)
       two_finger_close_vertical_distance_thresh(
           prop_reg,
           "Two Finger Vertical Close Distance Thresh",
-          35.0) {}
+          45.0) {}
 
 FingerMetrics::FingerMetrics()
     : tracking_id_(-1) {}

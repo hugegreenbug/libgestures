@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "trace_marker.h"
+#include "gestures/include/trace_marker.h"
 
 #include <fcntl.h>
 #include <mntent.h>
@@ -11,9 +11,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <base/eintr_wrapper.h>  // for HANDLE_EINTR
-
-#include "logging.h"
+#include "gestures/include/eintr_wrapper.h"
+#include "gestures/include/logging.h"
 
 namespace gestures {
 

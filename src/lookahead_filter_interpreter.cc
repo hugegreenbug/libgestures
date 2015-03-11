@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "lookahead_filter_interpreter.h"
+#include "gestures/include/lookahead_filter_interpreter.h"
 
 #include <algorithm>
 #include <math.h>
 #include <values.h>
 
-#include "tracer.h"
-#include "util.h"
+#include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 using std::max;
 using std::min;
@@ -27,7 +27,7 @@ LookaheadFilterInterpreter::LookaheadFilterInterpreter(
       last_interpreted_time_(0.0),
       min_nonsuppress_speed_(prop_reg, "Input Queue Min Nonsuppression Speed",
                              200.0),
-      min_delay_(prop_reg, "Input Queue Delay", 0.017),
+      min_delay_(prop_reg, "Input Queue Delay", 0.0),
       max_delay_(prop_reg, "Input Queue Max Delay", 0.017),
       split_min_period_(prop_reg, "Min Interpolate Period", 0.021),
       drumroll_suppression_enable_(prop_reg, "Drumroll Suppression Enable", 1),
