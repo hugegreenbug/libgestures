@@ -4,7 +4,7 @@
                                            Metrics* metrics,
                                            MetricsProperties* mprops,
                                            GestureConsumer* consumer) {
-+  float extra_screen_scale = 1.6;
++  float extra_screen_scale = 1.5;
 +  float base_dpi = 96.0;
 +
    tp_x_scale_ = 1.0 / hwprops->res_x;
