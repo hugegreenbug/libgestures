@@ -1,0 +1,20 @@
+diff -ruN libgestures/include/gestures/include/iir_filter_interpreter.h libgestures.new/include/gestures/include/iir_filter_interpreter.h
+--- libgestures/include/gestures/include/iir_filter_interpreter.h	2015-05-03 21:53:49.979904775 -0400
++++ libgestures.new/include/gestures/include/iir_filter_interpreter.h	2015-05-03 20:52:04.102016136 -0400
+@@ -78,6 +78,8 @@
+   virtual void DoubleWasWritten(DoubleProperty* prop);
+ 
+  private:
++  map<short, IoHistory, kMaxFingers> histories_;
++  
+   // y[0] = b[0]*x[0] + b[1]*x[1] + b[2]*x[2] + b[3]*x[3]
+   //        - (a[1]*y[1] + a[2]*y[2])
+   DoubleProperty b0_, b1_, b2_, b3_, a1_, a2_;
+@@ -90,7 +92,6 @@
+   // Whether IIR filter should be used. Put as a member varible for
+   // unittest purpose.
+   bool using_iir_;
+-  map<short, IoHistory, kMaxFingers> histories_;
+ };
+ 
+ }  // namespace gestures
