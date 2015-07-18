@@ -1,0 +1,21 @@
+--- libgestures/src/scaling_filter_interpreter.cc	2015-07-18 18:59:25.702850444 -0400
++++ libgestures.new/src/scaling_filter_interpreter.cc	2015-07-18 19:01:20.009536279 -0400
+@@ -280,13 +280,16 @@
+                                           Metrics* metrics,
+                                           MetricsProperties* mprops,
+                                           GestureConsumer* consumer) {
++  //Boost the screen scale to deal with slower mouse movement in Linux
++  double screen_scale_boost = 2.0;
++  
+   tp_x_scale_ = 1.0 / hwprops->res_x;
+   tp_y_scale_ = 1.0 / hwprops->res_y;
+   tp_x_translate_ = -1.0 * (hwprops->left * tp_x_scale_);
+   tp_y_translate_ = -1.0 * (hwprops->top * tp_y_scale_);
+ 
+-  screen_x_scale_ = hwprops->screen_x_dpi / 25.4;
+-  screen_y_scale_ = hwprops->screen_y_dpi / 25.4;
++  screen_x_scale_ = hwprops->screen_x_dpi / 25.4 * screen_scale_boost;
++  screen_y_scale_ = hwprops->screen_y_dpi / 25.4 * screen_scale_boost;
+ 
+   if (hwprops->orientation_maximum)
+     orientation_scale_ =
