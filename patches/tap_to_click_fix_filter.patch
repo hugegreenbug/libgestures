@@ -1,0 +1,205 @@
+diff -ruN libgestures/include/gestures/include/tap_to_click_fix_filter_interpreter.h libgestures.new/include/gestures/include/tap_to_click_fix_filter_interpreter.h
+--- libgestures/include/gestures/include/tap_to_click_fix_filter_interpreter.h	1969-12-31 17:00:00.000000000 -0700
++++ libgestures.new/include/gestures/include/tap_to_click_fix_filter_interpreter.h	2015-08-15 21:57:22.098817648 -0600
+@@ -0,0 +1,50 @@
++// Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include <gtest/gtest.h>  // for FRIEND_TEST
++
++#include "gestures/include/filter_interpreter.h"
++#include "gestures/include/immediate_interpreter.h"
++#include "gestures/include/gestures.h"
++#include "gestures/include/list.h"
++#include "gestures/include/prop_registry.h"
++#include "gestures/include/tracer.h"
++
++#ifndef GESTURES_TAP_TO_CLICK_FIX_FILTER_INTERPRETER_H_
++#define GESTURES_TAP_TO_CLICK_FIX_FILTER_INTERPRETER_H_
++
++namespace gestures {
++
++  class TapToClickFixFilterInterpreter : public FilterInterpreter {
++  public:
++    // Takes ownership of |next|:
++    TapToClickFixFilterInterpreter(PropRegistry* prop_reg,
++				   Interpreter* next,
++				   Tracer* tracer);
++    virtual ~TapToClickFixFilterInterpreter() {}
++
++  protected:
++    virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
++    virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
++    virtual void ConsumeGesture(const Gesture& gesture);
++  private:
++    float up_timeout_;
++    
++    struct ButtonDown {
++      int button_down;
++      int button_up;
++      stime_t start_time;
++ 
++      ButtonDown* next_;
++      ButtonDown* prev_;
++    };
++    
++    List<ButtonDown> queue_;
++    void UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now);
++    void ProduceGestures(stime_t now);
++  };
++
++}  // namespace gestures
++
++#endif  // GESTURES_SCALING_FILTER_INTERPRETER_H_
+diff -ruN libgestures/src/gestures.cc libgestures.new/src/gestures.cc
+--- libgestures/src/gestures.cc	2015-08-15 21:42:45.050169211 -0600
++++ libgestures.new/src/gestures.cc	2015-08-15 21:57:48.581381783 -0600
+@@ -32,6 +32,7 @@
+ #include "gestures/include/split_correcting_filter_interpreter.h"
+ #include "gestures/include/string_util.h"
+ #include "gestures/include/stuck_button_inhibitor_filter_interpreter.h"
++#include "gestures/include/tap_to_click_fix_filter_interpreter.h"
+ #include "gestures/include/t5r2_correcting_filter_interpreter.h"
+ #include "gestures/include/trace_marker.h"
+ #include "gestures/include/tracer.h"
+@@ -502,7 +503,6 @@
+       return;
+     }
+   }
+-
+   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
+   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
+@@ -524,6 +524,7 @@
+   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
+                                       GESTURES_DEVCLASS_TOUCHPAD);
+   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
++  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
+   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
+   temp = new T5R2CorrectingFilterInterpreter(prop_reg_.get(), temp,
+                                              tracer_.get());
+@@ -555,6 +556,8 @@
+   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
+                                       GESTURES_DEVCLASS_TOUCHPAD);
+   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
++  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
++    
+   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
+   temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
+                                                        tracer_.get());
+diff -ruN libgestures/src/tap_to_click_fix_filter_interpreter.cc libgestures.new/src/tap_to_click_fix_filter_interpreter.cc
+--- libgestures/src/tap_to_click_fix_filter_interpreter.cc	1969-12-31 17:00:00.000000000 -0700
++++ libgestures.new/src/tap_to_click_fix_filter_interpreter.cc	2015-08-15 21:59:14.429129313 -0600
+@@ -0,0 +1,101 @@
++// Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "gestures/include/tap_to_click_fix_filter_interpreter.h"
++#include "gestures/include/logging.h"
++#include "gestures/include/tracer.h"
++
++namespace gestures {
++
++  TapToClickFixFilterInterpreter::
++  TapToClickFixFilterInterpreter(PropRegistry* prop_reg,
++				 Interpreter* next,
++				 Tracer* tracer)
++    : FilterInterpreter(NULL, next, tracer, false),
++      up_timeout_(0.045f) {
++    InitName();
++  }
++  
++  void TapToClickFixFilterInterpreter::
++  ProduceGestures(stime_t now) {
++    ButtonDown *tap = NULL;
++    
++    if (!queue_.Empty())
++      tap = queue_.PopFront();
++    
++    if (tap) {
++      if (tap->button_up) {
++	ProduceGesture(Gesture(kGestureButtonsChange,
++			       now,
++			       now,
++			       GESTURES_BUTTON_NONE,
++			       tap->button_up));
++      }
++      if (tap->button_down) {
++	ProduceGesture(Gesture(kGestureButtonsChange,
++			       now,
++			       now,
++			       tap->button_down,
++			       GESTURES_BUTTON_NONE));
++      }
++      delete tap;
++    }
++  }
++  
++  void TapToClickFixFilterInterpreter::
++  UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now) {
++    ButtonDown *tap = NULL;
++
++    if (!queue_.Empty()) {
++      tap = queue_.PopFront();
++
++      if (next_timeout < 0 || next_timeout > up_timeout_)
++	next_timeout = up_timeout_;
++      
++      queue_.PushFront(tap);
++    }
++
++    *timeout = next_timeout;
++  }
++
++
++  void TapToClickFixFilterInterpreter::
++  SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout) {
++    stime_t next_timeout = -1;
++    
++    next_->SyncInterpret(hwstate, &next_timeout);
++    UpdateTimeouts(timeout, next_timeout, hwstate->timestamp);
++  }
++
++  void TapToClickFixFilterInterpreter::
++  HandleTimerImpl(stime_t now, stime_t* timeout) {
++    stime_t next_timeout = -1;
++    
++    ProduceGestures(now);
++    next_->HandleTimer(now, &next_timeout);
++    UpdateTimeouts(timeout, next_timeout, now);
++  }
++
++  void TapToClickFixFilterInterpreter::
++  ConsumeGesture(const Gesture& gesture) {
++    ButtonDown *tap = NULL;
++
++    if (gesture.type == kGestureTypeButtonsChange &&
++	gesture.details.buttons.down && gesture.details.buttons.up) {
++      tap = new ButtonDown();
++      tap->start_time = gesture.start_time;
++      tap->button_down = gesture.details.buttons.down;
++      tap->button_up = GESTURES_BUTTON_NONE;
++      queue_.PushBack(tap);
++      tap = new ButtonDown();
++      tap->start_time = gesture.start_time + up_timeout_;
++      tap->button_up = gesture.details.buttons.down;
++      tap->button_down = GESTURES_BUTTON_NONE;
++      queue_.PushBack(tap);
++      ProduceGestures(gesture.start_time);
++    } else {
++      ProduceGesture(gesture);
++    }
++  }
++}  // namespace gestures
+--- libgestures/Makefile	2015-08-15 21:42:44.993163839 -0600
++++ libgestures.new/Makefile	2015-08-15 22:05:47.861225315 -0600
+@@ -36,6 +36,7 @@
+ 	$(OBJDIR)/stationary_wiggle_filter_interpreter.o \
+ 	$(OBJDIR)/string_util.o \
+ 	$(OBJDIR)/stuck_button_inhibitor_filter_interpreter.o \
++	$(OBJDIR)/tap_to_click_fix_filter_interpreter.o \
+ 	$(OBJDIR)/t5r2_correcting_filter_interpreter.o \
+ 	$(OBJDIR)/trace_marker.o \
+ 	$(OBJDIR)/tracer.o \
