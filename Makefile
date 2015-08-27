@@ -40,6 +40,8 @@ SO_OBJECTS=\
 	$(OBJDIR)/trace_marker.o \
 	$(OBJDIR)/tracer.o \
 	$(OBJDIR)/trend_classifying_filter_interpreter.o \
+	$(OBJDIR)/tap_to_click_fix_filter_interpreter.o \
+ 	$(OBJDIR)/fling_to_scroll_filter_interpreter.o \
 	$(OBJDIR)/util.o \
 	$(OBJDIR)/log.o
 
@@ -73,6 +75,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/split_correcting_filter_interpreter_unittest.o \
 	$(OBJDIR)/stuck_button_inhibitor_filter_interpreter_unittest.o \
 	$(OBJDIR)/t5r2_correcting_filter_interpreter_unittest.o \
+ 	$(OBJDIR)/tap_to_click_fix_filter_interpreter_unittest.o \
 	$(OBJDIR)/trace_marker_unittest.o \
 	$(OBJDIR)/tracer_unittest.o \
 	$(OBJDIR)/unittest_util.o \
@@ -106,7 +109,6 @@ DEPDIR = .deps
 DESTDIR = /
 
 CXXFLAGS+=\
-	-g \
 	-std=gnu++11 \
 	-fno-exceptions \
 	-fno-strict-aliasing \
@@ -132,8 +134,8 @@ LID_TOUCHPAD_HELPER=lid_touchpad_helper
 # Local compilation needs these flags, esp for code coverage testing
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
-	-O1 \
-	-DVCSID="\"1234 TESTVERSION\"" \
+	-O3 \
+	-DVCSID="\"2.0.4\"" \
 	--coverage \
 	-ftest-coverage \
 	-fprofile-arcs

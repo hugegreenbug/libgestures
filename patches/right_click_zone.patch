@@ -17,7 +17,7 @@
  
 +int ImmediateInterpreter::
 +GetButtonTypeFromPosition(const HardwareState& hwstate) {
-+  if (hwstate.touch_cnt <= 0 || hwstate.finger_cnt > 1 || 
++  if (hwstate.finger_cnt <= 0 || hwstate.finger_cnt > 1 || 
 +      !button_right_click_zone_enable_.val_) {
 +    return GESTURES_BUTTON_LEFT;
 +  }
