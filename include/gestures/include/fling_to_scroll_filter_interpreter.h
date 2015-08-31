@@ -39,6 +39,8 @@ namespace gestures {
     stime_t previous_timestamp_;
     double time_offset_;
     double position_offset_;
+    double two_fingers_detected_time_;
+    double stop_delay_;
     double displacement_ratio_[2];
     double cumulative_scroll_[2];
     float movement_[2];
