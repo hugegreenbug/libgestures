@@ -13,7 +13,7 @@ namespace gestures {
 				 Interpreter* next,
 				 Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
-      up_timeout_(0.045f) {
+      up_timeout_(0.03f) {
     InitName();
   }
 
@@ -97,7 +97,8 @@ namespace gestures {
     ButtonDown *tap = NULL, *tap2 = NULL;
 
     if (gesture.type == kGestureTypeButtonsChange &&
-	gesture.details.buttons.down && gesture.details.buttons.up) {
+	gesture.details.buttons.down == GESTURES_BUTTON_LEFT && 
+        gesture.details.buttons.up == GESTURES_BUTTON_LEFT) {
       tap = free_list_.PopBack();
       if (!tap) {
 	Err("out of nodes?");

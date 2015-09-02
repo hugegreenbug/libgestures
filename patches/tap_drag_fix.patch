@@ -1,0 +1,54 @@
+diff -ruN -x .git libgestures/include/gestures/include/immediate_interpreter.h libgestures-ready/include/gestures/include/immediate_interpreter.h
+--- libgestures/include/gestures/include/immediate_interpreter.h	2015-09-01 10:07:28.660552310 -0600
++++ libgestures-ready/include/gestures/include/immediate_interpreter.h	2015-09-01 10:09:03.499685504 -0600
+@@ -631,13 +631,6 @@
+ 
+   TapRecord tap_record_;
+ 
+-  // Record time when the finger showed motion (uses different motion detection
+-  // than last_movement_timestamp_)
+-  stime_t tap_drag_last_motion_time_;
+-
+-  // True when the finger was stationary for a while during tap to drag
+-  bool tap_drag_finger_was_stationary_;
+-
+   // Time when the last motion (scroll, movement) occurred
+   stime_t last_movement_timestamp_;
+ 
+diff -ruN -x .git libgestures/src/immediate_interpreter.cc libgestures-ready/src/immediate_interpreter.cc
+--- libgestures/src/immediate_interpreter.cc	2015-09-01 10:07:28.675549326 -0600
++++ libgestures-ready/src/immediate_interpreter.cc	2015-09-01 10:08:51.909991098 -0600
+@@ -2287,8 +2287,6 @@
+           *buttons_down = *buttons_up = GESTURES_BUTTON_LEFT;
+           SetTapToClickState(kTtcFirstTapBegan, now);
+         } else {
+-          tap_drag_last_motion_time_ = now;
+-          tap_drag_finger_was_stationary_ = false;
+           SetTapToClickState(kTtcSubsequentTapBegan, now);
+         }
+       } else if (is_timeout) {
+@@ -2306,15 +2304,6 @@
+         tap_record_.Update(*hwstate, *state_buffer_.Get(1), added_fingers,
+                            removed_fingers, dead_fingers);
+ 
+-      if (!tap_record_.Motionless(*hwstate, *state_buffer_.Get(1),
+-                                  tap_max_movement_.val_)) {
+-        tap_drag_last_motion_time_ = now;
+-      }
+-      if (tap_record_.TapType() == GESTURES_BUTTON_LEFT &&
+-          now - tap_drag_last_motion_time_ > tap_drag_stationary_time_.val_) {
+-        tap_drag_finger_was_stationary_ = true;
+-      }
+-
+       if (is_timeout || tap_record_.Moving(*hwstate, tap_move_dist_.val_)) {
+         if (tap_record_.TapType() == GESTURES_BUTTON_LEFT) {
+           if (is_timeout) {
+@@ -2324,7 +2313,7 @@
+           } else {
+             bool drag_delay_met = (now - tap_to_click_state_entered_
+                                    > tap_drag_delay_.val_);
+-            if (drag_delay_met && tap_drag_finger_was_stationary_) {
++            if (drag_delay_met) {
+               *buttons_down = GESTURES_BUTTON_LEFT;
+               SetTapToClickState(kTtcDrag, now);
+             } else {
