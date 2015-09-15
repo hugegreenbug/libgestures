@@ -1,15 +1,14 @@
---- libgestures/src/gestures.cc	2015-08-31 09:12:49.557887303 -0600
-+++ libgestures-2.0.4-3/src/gestures.cc	2015-08-19 21:49:44.000000000 -0600
-@@ -32,6 +32,8 @@
+--- libgestures/src/gestures.cc	2015-09-14 22:16:46.676359587 -0600
++++ libgestures.new/src/gestures.cc	2015-09-14 14:29:34.079842209 -0600
+@@ -32,6 +32,7 @@
  #include "gestures/include/split_correcting_filter_interpreter.h"
  #include "gestures/include/string_util.h"
  #include "gestures/include/stuck_button_inhibitor_filter_interpreter.h"
-+#include "gestures/include/tap_to_click_fix_filter_interpreter.h"
 +#include "gestures/include/fling_to_scroll_filter_interpreter.h"
  #include "gestures/include/t5r2_correcting_filter_interpreter.h"
  #include "gestures/include/trace_marker.h"
  #include "gestures/include/tracer.h"
-@@ -502,8 +504,8 @@
+@@ -502,8 +503,8 @@
        return;
      }
    }
@@ -19,15 +18,7 @@
    temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
    temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
    temp = new PalmClassifyingFilterInterpreter(prop_reg_.get(), temp,
-@@ -524,6 +526,7 @@
-   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
-                                       GESTURES_DEVCLASS_TOUCHPAD);
-   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
-+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
-   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
-   temp = new T5R2CorrectingFilterInterpreter(prop_reg_.get(), temp,
-                                              tracer_.get());
-@@ -539,6 +542,7 @@
+@@ -539,6 +540,7 @@
  
  void GestureInterpreter::InitializeTouchpad2(void) {
    Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
@@ -35,11 +26,3 @@
    temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
    temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
    temp = new PalmClassifyingFilterInterpreter(prop_reg_.get(), temp,
-@@ -555,6 +559,7 @@
-   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
-                                       GESTURES_DEVCLASS_TOUCHPAD);
-   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
-+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
-   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
-   temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
-                                                        tracer_.get());
