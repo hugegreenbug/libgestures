@@ -181,7 +181,7 @@ namespace gestures {
 
       movement_[0] = movement_[1] = 0;
       if (max_start_velocity > 0) {
-	curve_duration_ = std::min((0.004f * max_start_velocity), 0.9f);
+	curve_duration_ = std::min((0.003f * max_start_velocity), 0.85f);
 	mid_curve_duration_ = curve_duration_/2.0f;
 	memset(cumulative_scroll_, 0, sizeof(double) * 2);
 	start_timestamp_ = gesture.start_time;
