@@ -16,6 +16,8 @@ namespace gestures {
 				 Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
       scroll_timeout_(0.05f),
+      filter_timeout_(0.001f),
+      last_scroll_(0.0),
       in_fling_(0),
       curve_duration_(0.2f),
       mid_curve_duration_(0.2f),
@@ -23,8 +25,6 @@ namespace gestures {
       previous_timestamp_(0),
       time_offset_(0),
       position_offset_(0),
-      two_fingers_detected_time_(0),
-      stop_delay_(0.04),
       fling_to_scroll_enabled_(prop_reg, "Fling To Scroll Enabled", 1) {
     InitName();
     memset(cumulative_scroll_, 0, sizeof(double) * 2);
@@ -49,11 +49,11 @@ namespace gestures {
   
   void FlingToScrollFilterInterpreter::ProduceGestures(stime_t now) {
     double delta[2];
-    stime_t adjusted_timeout = now - previous_timestamp_;
     
-    if (adjusted_timeout && adjusted_timeout < scroll_timeout_)
+    if (now - last_scroll_ < scroll_timeout_)
       return;
-    
+   
+    last_scroll_ = now; 
     memset(delta, 0, sizeof(double) * 2);
     if (!in_fling_) {
       return;
@@ -74,8 +74,8 @@ namespace gestures {
   void FlingToScrollFilterInterpreter::
   UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now) {
     if (in_fling_) {
-      if (next_timeout < 0 || next_timeout > scroll_timeout_)
-	next_timeout = scroll_timeout_;
+      if (next_timeout < 0 || next_timeout > filter_timeout_)
+	next_timeout = filter_timeout_;
     }
 
     Log("FlingToScroll Timeout is: %f", next_timeout);
@@ -88,13 +88,7 @@ namespace gestures {
     stime_t next_timeout = -1;
     
     if (hwstate->finger_cnt == 2) {
-      if (two_fingers_detected_time_ &&
-	  hwstate->timestamp - two_fingers_detected_time_ >= stop_delay_)
 	in_fling_ = 0;
-      if (!two_fingers_detected_time_)
-	two_fingers_detected_time_ = hwstate->timestamp;
-    } else {
-      two_fingers_detected_time_ = 0;
     }
     ProduceGestures(hwstate->timestamp);
     next_->SyncInterpret(hwstate, &next_timeout);
@@ -174,6 +168,7 @@ namespace gestures {
     if (gesture.type == kGestureTypeFling &&
 	(gesture.details.fling.vx || gesture.details.fling.vy)) {
       in_fling_ = 1;
+      last_scroll_ = 0;
       float max_start_velocity = std::max(fabs(gesture.details.fling.vx),
 					  fabs(gesture.details.fling.vy));
       if (max_start_velocity > GetVelocityAtTime(0))
@@ -181,7 +176,7 @@ namespace gestures {
 
       movement_[0] = movement_[1] = 0;
       if (max_start_velocity > 0) {
-	curve_duration_ = std::min((0.003f * max_start_velocity), 0.85f);
+	curve_duration_ = std::min((0.0022f * max_start_velocity), 0.85f);
 	mid_curve_duration_ = curve_duration_/2.0f;
 	memset(cumulative_scroll_, 0, sizeof(double) * 2);
 	start_timestamp_ = gesture.start_time;
@@ -198,8 +193,9 @@ namespace gestures {
       movement_[1] += fabs(gesture.details.move.dy);
       float max_movement = std::max(movement_[0], movement_[1]);
       if (max_movement > 5.0)
-       in_fling_ = 0;      
-    } else if (in_fling_ && gesture.type != kGestureTypeScroll) {
+       in_fling_ = 0;
+    } else if (in_fling_ && gesture.type != kGestureTypeScroll &&
+	       gesture.type != kGestureTypeFling) {
       in_fling_ = 0;
     }	
 

@@ -29,6 +29,8 @@ namespace gestures {
     virtual void ConsumeGesture(const Gesture& gesture);
   private:
     float scroll_timeout_;
+    float filter_timeout_;
+    stime_t last_scroll_;
     int in_fling_;
     const float kDefaultAlpha = -5.70762e+03f;
     const float kDefaultBeta = 1.72e+02f;
@@ -39,8 +41,6 @@ namespace gestures {
     stime_t previous_timestamp_;
     double time_offset_;
     double position_offset_;
-    double two_fingers_detected_time_;
-    double stop_delay_;
     double displacement_ratio_[2];
     double cumulative_scroll_[2];
     float movement_[2];
