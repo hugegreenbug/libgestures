@@ -16,7 +16,7 @@ namespace gestures {
 				 Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
       scroll_timeout_(0.05f),
-      filter_timeout_(0.001f),
+      filter_timeout_(0.015f),
       last_scroll_(0.0),
       in_fling_(0),
       curve_duration_(0.2f),
