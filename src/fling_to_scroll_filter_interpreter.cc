@@ -16,11 +16,10 @@ namespace gestures {
 				 Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
       scroll_timeout_(0.05f),
-      filter_timeout_(0.015f),
       last_scroll_(0.0),
       in_fling_(0),
       curve_duration_(0.2f),
-      mid_curve_duration_(0.2f),
+      last_velocity_(0),
       start_timestamp_(0),
       previous_timestamp_(0),
       time_offset_(0),
@@ -74,8 +73,8 @@ namespace gestures {
   void FlingToScrollFilterInterpreter::
   UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now) {
     if (in_fling_) {
-      if (next_timeout < 0 || next_timeout > filter_timeout_)
-	next_timeout = filter_timeout_;
+      if (next_timeout < 0 || next_timeout > scroll_timeout_)
+	next_timeout = scroll_timeout_;
     }
 
     Log("FlingToScroll Timeout is: %f", next_timeout);
@@ -111,13 +110,10 @@ namespace gestures {
     stime_t elapsed_time = (time - start_timestamp_);
     bool still_active = true;
     float scalar_offset;
-    float scalar_velocity;
+    float scalar_velocity, temp_velocity;
 
     double offset_time = elapsed_time + time_offset_;
     if (offset_time < curve_duration_) {
-      if (offset_time >= mid_curve_duration_) {
-	offset_time = std::max(curve_duration_ - offset_time, (double) 0.0f);
-      }	  
       scalar_offset = GetPositionAtTime(offset_time / 1000) - position_offset_;
       scalar_velocity = GetVelocityAtTime(offset_time);
     } else {
@@ -126,6 +122,9 @@ namespace gestures {
       still_active = false;
     }
 
+    temp_velocity = scalar_velocity;
+    scalar_velocity -= last_velocity_;
+    last_velocity_ = temp_velocity;
     Log("FlingToScroll compute - scaler_offset: %f , velocity: %f",
 	scalar_offset, scalar_velocity);
     *offset = scalar_offset;
@@ -177,7 +176,7 @@ namespace gestures {
       movement_[0] = movement_[1] = 0;
       if (max_start_velocity > 0) {
 	curve_duration_ = std::min((0.0022f * max_start_velocity), 0.85f);
-	mid_curve_duration_ = curve_duration_/2.0f;
+        last_velocity_ = 0;
 	memset(cumulative_scroll_, 0, sizeof(double) * 2);
 	start_timestamp_ = gesture.start_time;
 	previous_timestamp_ = gesture.start_time;

@@ -29,14 +29,13 @@ namespace gestures {
     virtual void ConsumeGesture(const Gesture& gesture);
   private:
     float scroll_timeout_;
-    float filter_timeout_;
     stime_t last_scroll_;
     int in_fling_;
     const float kDefaultAlpha = -5.70762e+03f;
     const float kDefaultBeta = 1.72e+02f;
     const float kDefaultGamma = 3.7e+00f;
     double curve_duration_;
-    double mid_curve_duration_;
+    double last_velocity_;
     stime_t start_timestamp_;
     stime_t previous_timestamp_;
     double time_offset_;
