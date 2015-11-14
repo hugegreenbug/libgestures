@@ -57,10 +57,11 @@ namespace gestures {
     if (!in_fling_) {
       return;
     }
+
+    
     in_fling_ = ComputeScrollDeltaAtTime(now, delta);
-    if (!in_fling_) {
-      return;
-    }
+    if (!in_fling_)
+	return;
 
     Log("Fling To Scroll - Produce Gestures - scroll_x: %f scroll_y: %f", delta[0], delta[1]);
     ProduceGesture(Gesture(kGestureScroll,
@@ -77,7 +78,6 @@ namespace gestures {
 	next_timeout = scroll_timeout_;
     }
 
-    Log("FlingToScroll Timeout is: %f", next_timeout);
     *timeout = next_timeout;
   }
 
@@ -86,9 +86,11 @@ namespace gestures {
   SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout) {
     stime_t next_timeout = -1;
     
-    if (hwstate->finger_cnt == 2) {
-	in_fling_ = 0;
+    if (hwstate->finger_cnt == 2 && in_fling_) {
+      in_fling_ = 0;
     }
+    Log("FlingToScroll finger count is :%d and in_fling_: %d", hwstate->finger_cnt, in_fling_);
+    
     ProduceGestures(hwstate->timestamp);
     next_->SyncInterpret(hwstate, &next_timeout);
     UpdateTimeouts(timeout, next_timeout, hwstate->timestamp);
@@ -175,7 +177,7 @@ namespace gestures {
 
       movement_[0] = movement_[1] = 0;
       if (max_start_velocity > 0) {
-	curve_duration_ = std::min((0.0022f * max_start_velocity), 0.85f);
+	curve_duration_ = std::min((0.0012f * max_start_velocity), 0.85f);
         last_velocity_ = 0;
 	memset(cumulative_scroll_, 0, sizeof(double) * 2);
 	start_timestamp_ = gesture.start_time;
@@ -198,7 +200,7 @@ namespace gestures {
       in_fling_ = 0;
     }	
 
-    if (!in_fling_ || gesture.type != kGestureTypeButtonsChange)
+    if (!in_fling_ || (gesture.type != kGestureTypeButtonsChange && gesture.type != kGestureTypeScroll))
       ProduceGesture(gesture);
   }
 }  // namespace gestures

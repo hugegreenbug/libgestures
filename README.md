@@ -7,6 +7,5 @@ The original code can be found here: https://chromium.googlesource.com/chromiumo
 
 To compile
 ===========
-./apply_patches.sh
 make
 sudo make install

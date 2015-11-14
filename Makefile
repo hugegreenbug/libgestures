@@ -133,11 +133,9 @@ LID_TOUCHPAD_HELPER=lid_touchpad_helper
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
 	-O3 \
-	-DVCSID="\"2.0.4\"" \
-	--coverage \
-	-ftest-coverage \
-	-fprofile-arcs
-LINK_FLAGS+=-lgcov
+	-DVCSID="\"2.1.9\""
+
+#LINK_FLAGS+=-lgcov
 else
 CXXFLAGS+=\
 	-DXLOGGING
