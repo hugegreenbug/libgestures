@@ -1,0 +1,29 @@
+Source: libgestures
+Priority: extra
+Maintainer: Hugh Greenberg <hugegreenbug@gmail.com>
+Build-Depends: 
+ debhelper (>= 8.0.0), 
+ pkg-config, 
+ dh-autoreconf,
+ quilt,
+ libglib2.0-dev,
+ libjsoncpp-dev
+Standards-Version: 3.9.4
+Section: libs
+Homepage: https://github.com/hugegreenbug/libgestures
+#Vcs-Git: git://git.debian.org/collab-maint/libgestures.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/libgestures.git;a=summary
+
+Package: libgestures-dev
+Section: libdevel
+Architecture: any
+Depends: libgestures (= ${binary:Version})
+Description: Development files for libgestures
+ Development files for libgestures
+
+Package: libgestures
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libglib2.0-0, libjsoncpp0
+Description: ChromiumOS libgestures
+ Gestures library from chromiumOS.  Required by xf86-input-cmt
