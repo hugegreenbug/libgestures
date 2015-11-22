@@ -132,7 +132,7 @@ LID_TOUCHPAD_HELPER=lid_touchpad_helper
 # Local compilation needs these flags, esp for code coverage testing
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
-	-O3 \
+        -O2 -fomit-frame-pointer \
 	-DVCSID="\"2.1.9\""
 
 #LINK_FLAGS+=-lgcov
