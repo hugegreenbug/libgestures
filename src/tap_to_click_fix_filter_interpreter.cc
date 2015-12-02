@@ -13,7 +13,7 @@ namespace gestures {
 				 Interpreter* next,
 				 Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
-      up_timeout_(0.05f) {
+      up_timeout_(0.1f) {
     InitName();
   }
 
@@ -39,7 +39,7 @@ namespace gestures {
     if (!queue_.Empty())
       tap = queue_.PopFront();
     
-    if (tap) {
+    if (tap && now - tap->start_time >= up_timeout_) {
       if (tap->button_up) {
 	ProduceGesture(Gesture(kGestureButtonsChange,
 			       now,
@@ -55,18 +55,31 @@ namespace gestures {
 			       GESTURES_BUTTON_NONE));
       }
       free_list_.PushBack(tap);
+    } else if (tap) {
+      queue_.PushFront(tap);
     }
   }
   
   void TapToClickFixFilterInterpreter::
   UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now) {
     ButtonDown *tap = NULL;
-
+    stime_t next_up_timeout;
+    stime_t min_timeout = 0.005;
+    
     if (!queue_.Empty()) {
       tap = queue_.PopFront();
-
-      if (next_timeout < 0 || next_timeout > up_timeout_)
-	next_timeout = up_timeout_;
+      
+      next_up_timeout = up_timeout_; 
+      if (now - tap->start_time >= up_timeout_) {
+        next_up_timeout = min_timeout;
+      } else if (now > tap->start_time) {
+        next_up_timeout = up_timeout_ - (now - tap->start_time);
+	if (next_up_timeout < min_timeout)
+	  next_up_timeout = min_timeout;
+      }
+      
+      if (next_timeout < 0 || next_timeout > next_up_timeout)
+	next_timeout = next_up_timeout;
       
       queue_.PushFront(tap);
     }
