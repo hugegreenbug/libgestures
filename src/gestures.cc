@@ -33,6 +33,7 @@
 #include "gestures/include/string_util.h"
 #include "gestures/include/stuck_button_inhibitor_filter_interpreter.h"
 #include "gestures/include/fling_to_scroll_filter_interpreter.h"
+#include "gestures/include/tap_to_click_fix_filter_interpreter.h"
 #include "gestures/include/t5r2_correcting_filter_interpreter.h"
 #include "gestures/include/trace_marker.h"
 #include "gestures/include/tracer.h"
@@ -504,6 +505,7 @@ void GestureInterpreter::InitializeTouchpad(void) {
     }
   }
   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingToScrollFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
@@ -540,6 +542,7 @@ void GestureInterpreter::InitializeTouchpad(void) {
 
 void GestureInterpreter::InitializeTouchpad2(void) {
   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingToScrollFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());

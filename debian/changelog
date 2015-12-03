@@ -1,3 +1,21 @@
+libgestures (2.1.13-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * Improved tap to click fix filter interpreter
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Wed, 1 Dec 2015 23:31:03 -0400
+
+libgestures (2.1.12-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * Improved tap to click fix filter interpreter
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Tue, 1 Dec 2015 23:31:03 -0400
+
+libgestures (2.1.11-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * Added tap to click fix filter interpreter to split up tap to click events
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Mon, 30 Nov 2015 23:31:03 -0400
+
 libgestures (2.1.9-1ubuntu1) vivid-galliumos; urgency=medium
 
   * Fix for /home/hugh/Downloads/libgestures-2.1.5/obj/* being created
