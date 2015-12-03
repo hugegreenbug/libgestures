@@ -134,7 +134,7 @@ LID_TOUCHPAD_HELPER=lid_touchpad_helper
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
         -O2 -fomit-frame-pointer \
-	-DVCSID="\"2.1.11\""
+	-DVCSID="\"2.1.13\""
 
 #LINK_FLAGS+=-lgcov
 else
