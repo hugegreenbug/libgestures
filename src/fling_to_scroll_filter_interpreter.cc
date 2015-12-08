@@ -129,7 +129,6 @@ namespace gestures {
       in_fling_ = 0;
     }	
 
-    if (!in_fling_ || (gesture.type != kGestureTypeButtonsChange && gesture.type != kGestureTypeScroll))
-      ProduceGesture(gesture);
+    ProduceGesture(gesture);
   }
 }  // namespace gestures
