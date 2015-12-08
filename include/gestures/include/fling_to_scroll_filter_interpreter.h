@@ -29,28 +29,15 @@ namespace gestures {
     virtual void ConsumeGesture(const Gesture& gesture);
   private:
     float scroll_timeout_;
-    stime_t last_scroll_;
     int in_fling_;
-    const float kDefaultAlpha = -5.70762e+03f;
-    const float kDefaultBeta = 1.72e+02f;
-    const float kDefaultGamma = 3.7e+00f;
+    stime_t last_scroll_;
+    stime_t start_time_;
     double curve_duration_;
-    double last_velocity_;
-    stime_t start_timestamp_;
-    stime_t previous_timestamp_;
-    double time_offset_;
-    double position_offset_;
-    double displacement_ratio_[2];
-    double cumulative_scroll_[2];
+    double vel_[2];
     float movement_[2];
     BoolProperty fling_to_scroll_enabled_;
     void UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now);
     void ProduceGestures(stime_t now);
-    bool ComputeScrollOffset(stime_t time, double* offset, double* velocity);
-    bool ComputeScrollDeltaAtTime(stime_t current, double* delta);
-    double GetPositionAtTime(double t);
-    double GetVelocityAtTime(double t);
-    double GetTimeAtVelocity(double v);
   };
 }  // namespace gestures
 
