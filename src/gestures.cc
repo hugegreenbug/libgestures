@@ -401,8 +401,7 @@ GestureInterpreter::GestureInterpreter(int version)
       callback_data_(NULL),
       timer_provider_(NULL),
       timer_provider_data_(NULL),
-      interpret_timer_(NULL),
-      loggingFilter_(NULL) {
+      interpret_timer_(NULL) {
   prop_reg_.reset(new PropRegistry);
   tracer_.reset(new Tracer(prop_reg_.get(), TraceMarker::StaticTraceWrite));
   TraceMarker::CreateTraceMarker();
@@ -505,7 +504,7 @@ void GestureInterpreter::InitializeTouchpad(void) {
     }
   }
   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
-  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new FlingToScrollFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
@@ -534,15 +533,13 @@ void GestureInterpreter::InitializeTouchpad(void) {
                                                 tracer_.get());
   temp = new NonLinearityFilterInterpreter(prop_reg_.get(), temp,
                                            tracer_.get());
-  temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
-                                                       tracer_.get());
   interpreter_.reset(temp);
   temp = NULL;
 }
 
 void GestureInterpreter::InitializeTouchpad2(void) {
   Interpreter* temp = new ImmediateInterpreter(prop_reg_.get(), tracer_.get());
-  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
+  temp = new TapToClickFixFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new FlingToScrollFilterInterpreter(prop_reg_.get(), temp, tracer_.get());  
   temp = new FlingStopFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ClickWiggleFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
@@ -561,8 +558,6 @@ void GestureInterpreter::InitializeTouchpad2(void) {
                                       GESTURES_DEVCLASS_TOUCHPAD);
   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
-  temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
-                                                       tracer_.get());
   interpreter_.reset(temp);
   temp = NULL;
 }
@@ -576,8 +571,6 @@ void GestureInterpreter::InitializeMouse(void) {
   temp = new MetricsFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
                                       GESTURES_DEVCLASS_MOUSE);
   temp = new IntegralGestureFilterInterpreter(temp, tracer_.get());
-  temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
-                                                       tracer_.get());
   interpreter_.reset(temp);
   temp = NULL;
 }
@@ -599,8 +592,6 @@ void GestureInterpreter::InitializeMultitouchMouse(void) {
   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
   temp = new NonLinearityFilterInterpreter(prop_reg_.get(), temp,
                                            tracer_.get());
-  temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
-                                                       tracer_.get());
   interpreter_.reset(temp);
   temp = NULL;
 }
@@ -619,10 +610,6 @@ void GestureInterpreter::Initialize(GestureInterpreterDeviceClass cls) {
   mprops_.reset(new MetricsProperties(prop_reg_.get()));
   consumer_.reset(new GestureInterpreterConsumer(callback_,
                                                    callback_data_));
-}
-
-std::string GestureInterpreter::EncodeActivityLog() {
-  return loggingFilter_->EncodeActivityLog();
 }
 
 const GestureMove kGestureMove = { 0, 0, 0, 0 };

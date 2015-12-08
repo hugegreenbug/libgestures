@@ -38,6 +38,7 @@ namespace gestures {
     struct ButtonDown {
       int button_down;
       int button_up;
+      int split;
       stime_t start_time;
  
       ButtonDown* next_;
@@ -47,7 +48,6 @@ namespace gestures {
     List<ButtonDown> queue_;
     List<ButtonDown> free_list_;
     void UpdateTimeouts(stime_t* timeout, stime_t next_timeout, stime_t now);
-    void ProduceAllGestures(stime_t now);
     void ProduceGestures(stime_t now);
   };
 

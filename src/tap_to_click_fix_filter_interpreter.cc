@@ -36,51 +36,20 @@ namespace gestures {
   ProduceGestures(stime_t now) {
     ButtonDown *tap = NULL;
     
-    if (!queue_.Empty())
-      tap = queue_.PopFront();
-    
-    if (tap && now - tap->start_time >= up_timeout_) {
-      if (tap->button_up) {
-	ProduceGesture(Gesture(kGestureButtonsChange,
-			       now,
-			       now,
-			       GESTURES_BUTTON_NONE,
-			       tap->button_up));
-      }
-      if (tap->button_down) {
-	ProduceGesture(Gesture(kGestureButtonsChange,
-			       now,
-			       now,
-			       tap->button_down,
-			       GESTURES_BUTTON_NONE));
-      }
-      free_list_.PushBack(tap);
-    } else if (tap) {
-      queue_.PushFront(tap);
-    }
-  }
-
-  void TapToClickFixFilterInterpreter::
-  ProduceAllGestures(stime_t now) {
-    ButtonDown *tap = NULL;
-    
     while (!queue_.Empty()) {
       tap = queue_.PopFront();
-      if (tap->button_up) {
-	ProduceGesture(Gesture(kGestureButtonsChange,
-			       now,
-			       now,
-			       GESTURES_BUTTON_NONE,
-			       tap->button_up));
-      }
-      if (tap->button_down) {
+    
+      if (tap && ((now - tap->start_time >= up_timeout_) || !tap->split)) {
 	ProduceGesture(Gesture(kGestureButtonsChange,
 			       now,
 			       now,
 			       tap->button_down,
-			       GESTURES_BUTTON_NONE));
+			       tap->button_up));
+	free_list_.PushBack(tap);
+      } else if (tap) {
+	queue_.PushFront(tap);
+	break;
       }
-      free_list_.PushBack(tap);
     }
   }
 
@@ -115,7 +84,8 @@ namespace gestures {
   void TapToClickFixFilterInterpreter::
   SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout) {
     stime_t next_timeout = -1;
-    
+
+    ProduceGestures(hwstate->timestamp);
     next_->SyncInterpret(hwstate, &next_timeout);
     UpdateTimeouts(timeout, next_timeout, hwstate->timestamp);
   }
@@ -144,6 +114,7 @@ namespace gestures {
       tap->start_time = gesture.start_time;
       tap->button_down = gesture.details.buttons.down;
       tap->button_up = GESTURES_BUTTON_NONE;
+      tap->split = 1;
       tap2 = free_list_.PopBack();
       if (!tap2) {
 	free_list_.PushBack(tap);
@@ -154,12 +125,22 @@ namespace gestures {
       tap2->start_time = gesture.start_time + up_timeout_;
       tap2->button_up = gesture.details.buttons.down;
       tap2->button_down = GESTURES_BUTTON_NONE;
+      tap2->split = 1;
       queue_.PushBack(tap);	    
       queue_.PushBack(tap2);
       ProduceGestures(gesture.start_time);
     } else if (gesture.type == kGestureTypeButtonsChange) {
-      ProduceAllGestures(gesture.start_time);
-      ProduceGesture(gesture);
+      tap = free_list_.PopBack();
+      if (!tap) {
+	Err("out of nodes?");
+	return;
+      }
+      tap->start_time = gesture.start_time;
+      tap->button_down = gesture.details.buttons.down;
+      tap->button_up = gesture.details.buttons.up;
+      tap->split = 0;
+      queue_.PushBack(tap);
+      ProduceGestures(gesture.start_time);
     } else {
       ProduceGesture(gesture);
     }
