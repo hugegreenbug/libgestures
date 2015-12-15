@@ -1,3 +1,10 @@
+libgestures (2.1.16-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * More improvements for the fling to scroll filter interpreter
+  * A better implementation for splitting single tap to clicks into separate down and up events
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Sat, 13 Dec 2015 23:31:03 -0400
+
 libgestures (2.1.15-1ubuntu1) vivid-galliumos; urgency=medium
 
   * Improved fling to scroll filter interpreter
