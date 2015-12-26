@@ -24,6 +24,6 @@ Description: Development files for libgestures
 Package: libgestures
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libglib2.0-0, libjsoncpp0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libglib2.0-0, libjsoncpp0 | libjsoncpp0v5
 Description: ChromiumOS libgestures
  Gestures library from chromiumOS.  Required by xf86-input-cmt

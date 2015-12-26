@@ -1,3 +1,11 @@
+libgestures (2.1.14-1ubuntu2) vivid-galliumos; urgency=medium
+
+  * Disable testing
+  * Enable parallel build
+  * Allow dependency on libjsoncpp0v5 for gcc5
+
+ -- Eugene San (eugenesan) <eugenesan@gmail.com>  Fri, 25 Dec 2015 08:10:01 -0500
+
 libgestures (2.1.14-1ubuntu1) vivid-galliumos; urgency=medium
 
   * Improved tap to click fix filter interpreter
