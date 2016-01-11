@@ -1,3 +1,10 @@
+libgestures (2.1.16) vivid-galliumos; urgency=medium
+
+  * Set package version to match provenance
+  * Upstream: https://github.com/hugegreenbug/libgestures
+
+ -- reynhout <reynhout@galliumos.org>  Sun, 10 Jan 2016 21:05:33 +0000
+
 libgestures (2.1.16-1ubuntu1) vivid-galliumos; urgency=medium
 
   * More improvements for the fling to scroll filter interpreter
