@@ -1,10 +1,29 @@
-libgestures (2.1.14-1ubuntu2) vivid-galliumos; urgency=medium
+libgestures (2.1.17) vivid-galliumos; urgency=medium
 
   * Disable testing
   * Enable parallel build
   * Allow dependency on libjsoncpp0v5 for gcc5
 
  -- Eugene San (eugenesan) <eugenesan@gmail.com>  Fri, 25 Dec 2015 08:10:01 -0500
+libgestures (2.1.16) vivid-galliumos; urgency=medium
+
+  * Set package version to match provenance
+  * Upstream: https://github.com/hugegreenbug/libgestures
+
+ -- reynhout <reynhout@galliumos.org>  Sun, 10 Jan 2016 21:05:33 +0000
+
+libgestures (2.1.16-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * More improvements for the fling to scroll filter interpreter
+  * A better implementation for splitting single tap to clicks into separate down and up events
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Sat, 13 Dec 2015 23:31:03 -0400
+
+libgestures (2.1.15-1ubuntu1) vivid-galliumos; urgency=medium
+
+  * Improved fling to scroll filter interpreter
+
+ -- Hugh Greenberg <hugh@galliumos.org>  Mon, 7 Dec 2015 23:31:03 -0400
 
 libgestures (2.1.14-1ubuntu1) vivid-galliumos; urgency=medium
 
