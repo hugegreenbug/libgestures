@@ -30,6 +30,7 @@ namespace gestures {
   private:
     float scroll_timeout_;
     int in_fling_;
+    stime_t two_finger_time_;
     stime_t last_scroll_;
     stime_t start_time_;
     double curve_duration_;

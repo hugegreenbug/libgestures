@@ -368,6 +368,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
     kTtcIdle,
     kTtcFirstTapBegan,
     kTtcTapComplete,
+    kTtcTapUp,
     kTtcSubsequentTapBegan,
     kTtcDrag,
     kTtcDragRelease,

@@ -137,8 +137,9 @@ void TapRecord::Update(const HardwareState& hwstate,
        it != e; ++it) {
     const FingerState* fs = hwstate.GetFingerState((*it).first);
     if (fs) {
-      if (fs->pressure >= immediate_interpreter_->tap_min_pressure())
+      if (fs->pressure >= immediate_interpreter_->tap_min_pressure()) {
         min_tap_pressure_met_.insert(fs->tracking_id);
+      }
       if (fs->pressure >= cotap_min_pressure) {
         min_cotap_pressure_met_.insert(fs->tracking_id);
         if ((*it).second.pressure < cotap_min_pressure) {
@@ -148,7 +149,8 @@ void TapRecord::Update(const HardwareState& hwstate,
         }
       }
       stime_t finger_age = hwstate.timestamp -
-          immediate_interpreter_->finger_origin_timestamp(fs->tracking_id);
+	immediate_interpreter_->finger_origin_timestamp(fs->tracking_id);
+
       if (finger_age > immediate_interpreter_->tap_max_finger_age())
         fingers_below_max_age_ = false;
     }
@@ -2043,6 +2045,7 @@ const char* ImmediateInterpreter::TapToClickStateName(TapToClickState state) {
     case kTtcIdle: return "Idle";
     case kTtcFirstTapBegan: return "FirstTapBegan";
     case kTtcTapComplete: return "TapComplete";
+    case kTtcTapUp: return "TapUp";
     case kTtcSubsequentTapBegan: return "SubsequentTapBegan";
     case kTtcDrag: return "Drag";
     case kTtcDragRelease: return "DragRelease";
@@ -2056,6 +2059,7 @@ stime_t ImmediateInterpreter::TimeoutForTtcState(TapToClickState state) {
     case kTtcIdle: return tap_timeout_.val_;
     case kTtcFirstTapBegan: return tap_timeout_.val_;
     case kTtcTapComplete: return inter_tap_timeout_.val_;
+    case kTtcTapUp: return change_timeout_.val_;
     case kTtcSubsequentTapBegan: return tap_timeout_.val_;
     case kTtcDrag: return tap_timeout_.val_;
     case kTtcDragRelease: return tap_drag_timeout_.val_;
@@ -2197,7 +2201,8 @@ void ImmediateInterpreter::UpdateTapState(
   //       ↓ added finger(s)                                                |
   //  ,>[FirstTapBegan] -<right click: send right click, timeout/movement>->|
   //  |    ↓ released all fingers                                           |
-  // ,->[TapComplete*] --<timeout: send click>----------------------------->|
+  // ,->[TapComplete*] --<timeout: send up and down or down for click>----->|
+  // |  [TapUp*] --<timeout: send up for click>---------------------------->|
   // ||    | | two finger touching: send left click.                        |
   // |'----+-'                                                              |
   // |     ↓ add finger(s)                                                  |
@@ -2264,7 +2269,7 @@ void ImmediateInterpreter::UpdateTapState(
           tap_record_.Moving(*hwstate, tap_move_dist_.val_));
       if (tap_record_.TapComplete()) {
         if (!tap_record_.MinTapPressureMet() ||
-            !tap_record_.FingersBelowMaxAge()) {
+	    !tap_record_.FingersBelowMaxAge()) {
           SetTapToClickState(kTtcIdle, now);
         } else if (tap_record_.TapType() == GESTURES_BUTTON_LEFT &&
                    tap_drag_enable_.val_) {
@@ -2279,12 +2284,10 @@ void ImmediateInterpreter::UpdateTapState(
       break;
     case kTtcTapComplete:
       if (!added_fingers.empty()) {
-
         tap_record_.Clear();
         tap_record_.Update(
             *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
-
         // If more than one finger is touching: Send click
         // and return to FirstTapBegan state.
         if (tap_record_.TapType() != GESTURES_BUTTON_LEFT) {
@@ -2294,9 +2297,25 @@ void ImmediateInterpreter::UpdateTapState(
           SetTapToClickState(kTtcSubsequentTapBegan, now);
         }
       } else if (is_timeout) {
-        *buttons_down = *buttons_up =
-            tap_record_.MinTapPressureMet() ? tap_record_.TapType() : 0;
-        SetTapToClickState(kTtcIdle, now);
+	*buttons_up = GESTURES_BUTTON_NONE;
+	*buttons_down = tap_record_.MinTapPressureMet() ? tap_record_.TapType() : 0;
+	if (*buttons_down)
+	  SetTapToClickState(kTtcTapUp, now);
+	else
+	  SetTapToClickState(kTtcIdle, now);
+      }
+      break;
+    case kTtcTapUp:
+      if (is_timeout) {
+	*buttons_down = GESTURES_BUTTON_NONE;
+	*buttons_up = tap_record_.TapType();
+        SetTapToClickState(kTtcIdle, now);	
+      }
+      if (!added_fingers.empty()) {
+        tap_record_.Clear();
+        tap_record_.Update(
+            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            dead_fingers);
       }
       break;
     case kTtcSubsequentTapBegan:
@@ -2321,9 +2340,8 @@ void ImmediateInterpreter::UpdateTapState(
               *buttons_down = GESTURES_BUTTON_LEFT;
               SetTapToClickState(kTtcDrag, now);
             } else {
-              *buttons_down = GESTURES_BUTTON_LEFT;
-              *buttons_up = GESTURES_BUTTON_LEFT;
-              SetTapToClickState(kTtcIdle, now);
+	      *buttons_down = *buttons_up = GESTURES_BUTTON_LEFT;
+	      SetTapToClickState(kTtcIdle, now);
             }
           }
         } else if (!tap_record_.TapComplete()) {
@@ -2410,6 +2428,9 @@ void ImmediateInterpreter::UpdateTapState(
     case kTtcTapComplete:
       *timeout = TimeoutForTtcState(tap_to_click_state_);
       break;
+    case kTtcTapUp:
+      *timeout = TimeoutForTtcState(tap_to_click_state_);
+      break;    
     case kTtcDragRelease:
       *timeout = TimeoutForTtcState(tap_to_click_state_);
       break;
