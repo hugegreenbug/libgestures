@@ -8,6 +8,7 @@
 #include "gestures/include/gestures.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/vector.h"
+#include <cmath>
 
 namespace gestures {
 
