@@ -1281,10 +1281,13 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
       continue;
     float dist_sq = DistanceTravelledSq(fs, true, true);
     float dt = hwstate.timestamp - origin_timestamps_[fs.tracking_id];
+    float dist_sq_min_dt = dist_sq * min_dt;
+    float dist_sq_min_dt_min_dt = dist_sq * min_dt * min_dt;
+    float thumb_speed_sq_thresh_dt_dt = thumb_speed_sq_thresh * dt * dt;
     bool closer_to_origin = dist_sq <= thumb_dist_sq_thresh;
-    bool slower_moved = (dist_sq * min_dt &&
-                         dist_sq * min_dt * min_dt <
-                         thumb_speed_sq_thresh * dt * dt);
+    bool slower_moved = (dist_sq_min_dt &&
+                         dist_sq_min_dt_min_dt <
+                         thumb_speed_sq_thresh_dt_dt);
     bool relatively_motionless = closer_to_origin || slower_moved;
     bool likely_thumb =
         (fs.pressure > min_pressure + two_finger_pressure_diff_thresh_.val_ &&
@@ -2699,10 +2702,12 @@ void ImmediateInterpreter::FillResultGesture(
             state_buffer_.Get(1)->timestamp - state_buffer_.Get(2)->timestamp;
         float dist_sq = DistSq(*current, *prev);
         float dist_sq2 = DistSq(*prev, *prev2);
-        if (dist_sq2 * dt &&  // have prev dist and current time
-            dist_sq2 * dt * dt *
-            quick_acceleration_factor_.val_ * quick_acceleration_factor_.val_ <
-            dist_sq * dt2 * dt2) {
+        float dist_sq2_dt = dist_sq2 * dt;
+        float dist_sq2_dt_dt_quick_acceleration_factor_val__quick_acceleration_factor_val_ = dist_sq2 * dt * dt * quick_acceleration_factor_.val_ * quick_acceleration_factor_.val_;
+        float dist_sq_dt2_dt2 = dist_sq * dt2 * dt2;
+        if (dist_sq2_dt &&  // have prev dist and current time
+            dist_sq2_dt_dt_quick_acceleration_factor_val__quick_acceleration_factor_val_ <
+            dist_sq_dt2_dt2) {
           return;
         }
       }
